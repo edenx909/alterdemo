@@ -3,6 +3,45 @@ const cors = require("cors");
 const path = require("path");
 const app = express();
 
+// Enhanced logging middleware - only for important requests
+app.use((req, res, next) => {
+  // Skip logging for static assets, fonts, favicon, etc.
+  const skipPaths = ['/fonts/', '/favicon', '.css', '.js', '.png', '.jpg', '.ico', '.svg', '.woff', '.ttf', '.otf'];
+  const shouldSkip = skipPaths.some(path => req.originalUrl.includes(path)) || 
+                   (req.originalUrl === '/' && req.method === 'GET');
+  
+  if (shouldSkip) {
+    return next();
+  }
+
+  const timestamp = new Date().toISOString();
+  const identity = (req.headers.authorization || "").replace("Bearer ", "") || 'anonymous';
+  
+  // Only log MCP actions - skip data loading API calls
+  if (req.originalUrl === '/mcp') {
+    console.log(`\n🌐 [${timestamp}] ${req.method} ${req.originalUrl}`);
+    console.log(`   Identity: ${identity}`);
+    
+    if (req.body && Object.keys(req.body).length > 0) {
+      console.log(`   Body: ${JSON.stringify(req.body, null, 2)}`);
+    }
+
+    // Capture original res.json to log responses for MCP calls only
+    const originalJson = res.json;
+    res.json = function(data) {
+      const responseTime = Date.now() - req.startTime;
+      console.log(`📤 [${new Date().toISOString()}] Response: ${res.statusCode} (${responseTime}ms)`);
+      console.log(`   Data: ${JSON.stringify(data, null, 2)}`);
+      console.log(`${'='.repeat(60)}\n`);
+      return originalJson.call(this, data);
+    };
+  }
+
+  // Track request start time
+  req.startTime = Date.now();
+  next();
+});
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
@@ -224,7 +263,20 @@ function auditLog(identityId, action, allowed, reason, timestamp = new Date()) {
   };
   
   auditLogs.unshift(logEntry);
-  console.log(`[${logEntry.timestamp}] ${logEntry.message}`);
+  
+  // Enhanced audit logging with more detail
+  console.log(`\n🔐 [${logEntry.timestamp}] SECURITY AUDIT`);
+  console.log(`   Identity: ${identityName} (${identityId})`);
+  console.log(`   Action: ${action}`);
+  console.log(`   Result: ${allowed ? "✅ ALLOWED" : "❌ BLOCKED"}`);
+  console.log(`   Reason: ${reason}`);
+  console.log(`   Risk Level: ${logEntry.riskLevel.toUpperCase()}`);
+  if (identity) {
+    console.log(`   Role: ${identity.roleType}`);
+    console.log(`   Status: ${identity.status}`);
+    console.log(`   Policies: ${identity.assignedPolicies.join(', ')}`);
+  }
+  console.log(`${'='.repeat(80)}`);
 
   // Keep only last 100 logs
   if (auditLogs.length > 100) {
@@ -530,20 +582,67 @@ function getPolicyPermission(identityId, tool) {
   return false;
 }
 
+// Add error handling middleware for better logging
+app.use((err, req, res, next) => {
+  const timestamp = new Date().toISOString();
+  console.log(`\n❌ [${timestamp}] SERVER ERROR`);
+  console.log(`   Error: ${err.message}`);
+  console.log(`   Stack: ${err.stack}`);
+  console.log(`   Request: ${req.method} ${req.originalUrl}`);
+  console.log(`   Body: ${JSON.stringify(req.body, null, 2)}`);
+  console.log(`${'='.repeat(80)}\n`);
+  
+  res.status(500).json({
+    error: 'Internal server error',
+    timestamp: timestamp,
+    message: err.message
+  });
+});
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`🚀 MCP Gateway running on port ${PORT}`);
-  console.log(`\n📋 Available identities for testing:`);
+  console.log(`\n${'='.repeat(80)}`);
+  console.log(`🚀 MCP GATEWAY AUTH CONTROL - LIVE SERVER STARTED`);
+  console.log(`   Port: ${PORT}`);
+  console.log(`   Time: ${new Date().toISOString()}`);
+  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`${'='.repeat(80)}`);
+  
+  console.log(`\n📋 AVAILABLE IDENTITIES FOR TESTING:`);
   identities.forEach(identity => {
-    console.log(`   - ${identity.id} (${identity.name} - ${identity.roleType})`);
+    console.log(`   - ${identity.id.padEnd(20)} | ${identity.name.padEnd(25)} | ${identity.roleType.padEnd(10)} | ${identity.status}`);
   });
-  console.log(`\n💡 Example curl commands:`);
-  console.log(`   curl -X POST http://localhost:${PORT}/mcp \\`);
+  
+  console.log(`\n🔧 API ENDPOINTS:`);
+  console.log(`   POST /mcp                           - Main MCP gateway endpoint`);
+  console.log(`   GET  /api/logs                      - Audit logs`);
+  console.log(`   GET  /api/identities                - List identities`);
+  console.log(`   GET  /api/policies                  - List policies`);
+  console.log(`   GET  /api/services                  - List services`);
+  console.log(`   GET  /api/permissions/:identityId   - Check permissions`);
+  
+  console.log(`\n💡 EXAMPLE CURL COMMANDS:`);
+  console.log(`   # ✅ WILL PASS - Admin has full access`);
+  console.log(`   curl -X POST exposedurl/mcp \\`);
   console.log(`        -H "Content-Type: application/json" \\`);
   console.log(`        -H "Authorization: Bearer admin-001" \\`);
   console.log(`        -d '{"method": "github.create-issue"}'`);
-  console.log(`\n   curl -X POST http://localhost:${PORT}/mcp \\`);
+  console.log(`\n   # ✅ WILL PASS - Sales can create Salesforce leads`);
+  console.log(`   curl -X POST exposedurl/mcp \\`);
+  console.log(`        -H "Content-Type: application/json" \\`);
+  console.log(`        -H "Authorization: Bearer sales-003" \\`);
+  console.log(`        -d '{"method": "salesforce.create-lead"}'`);
+  console.log(`\n   # ❌ WILL FAIL - Sales cannot create GitHub PRs`);
+  console.log(`   curl -X POST exposedurl/mcp \\`);
   console.log(`        -H "Content-Type: application/json" \\`);
   console.log(`        -H "Authorization: Bearer sales-003" \\`);
   console.log(`        -d '{"method": "github.create-pr"}'`);
+  console.log(`\n   # ❌ WILL FAIL - Restricted user has very limited access`);
+  console.log(`   curl -X POST exposedurl/mcp \\`);
+  console.log(`        -H "Content-Type: application/json" \\`);
+  console.log(`        -H "Authorization: Bearer restricted-004" \\`);
+  console.log(`        -d '{"method": "jira.create-ticket"}'`);
+  
+  console.log(`\n🔍 LIVE LOGGING ENABLED - All server activity will be displayed below:`);
+  console.log(`${'='.repeat(80)}\n`);
 });

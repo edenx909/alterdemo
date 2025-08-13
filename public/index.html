@@ -1956,7 +1956,7 @@
             .join("");
         }
 
-        testAction(identityId, action) {
+        async testAction(identityId, action) {
           const identity = this.identities.find((i) => i.id === identityId);
           if (!identity || identity.status !== "active") {
             this.logAction(
@@ -1969,12 +1969,40 @@
             return false;
           }
 
-          const permissions = this.getEffectivePermissions(identityId);
-          const allowed = permissions[action] === true;
-          const reason = this.getPermissionReason(identityId, action);
+          try {
+            // Make actual API call to server
+            const response = await fetch('/mcp', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${identityId}`
+              },
+              body: JSON.stringify({
+                method: action
+              })
+            });
 
-          this.logAction(identityId, action, allowed, reason, true);
-          return allowed;
+            const result = await response.json();
+            const allowed = response.ok;
+            const reason = result.reason || (allowed ? 'Action successful' : result.error);
+            
+            // Log the actual server response
+            this.logAction(identityId, action, allowed, reason, true);
+            
+            // Show result in console for debugging
+            console.log('Test Action Result:', {
+              identity: identity.name,
+              action: action,
+              allowed: allowed,
+              response: result
+            });
+            
+            return allowed;
+          } catch (error) {
+            console.error('Error testing action:', error);
+            this.logAction(identityId, action, false, 'Network error', true);
+            return false;
+          }
         }
 
         getPermissionReason(identityId, action) {
