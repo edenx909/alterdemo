@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MCP Gateway Auth Control Demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        font-weight: 300;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        min-height: 70vh;
+      }
+
+      .left-panel {
+        padding: 30px;
+        background: #f8f9fa;
+        border-right: 1px solid #e9ecef;
+      }
+
+      .right-panel {
+        padding: 30px;
+        background: white;
+      }
+
+      .section {
+        margin-bottom: 30px;
+      }
+
+      .section h3 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 1.3em;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 5px;
+      }
+
+      .user-selector {
+        display: grid;
+        gap: 10px;
+      }
+
+      .user-btn {
+        padding: 15px;
+        border: 2px solid #ddd;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: left;
+      }
+
+      .user-btn:hover {
+        border-color: #3498db;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+      }
+
+      .user-btn.active {
+        border-color: #3498db;
+        background: #3498db;
+        color: white;
+      }
+
+      .user-title {
+        font-weight: bold;
+        font-size: 1.1em;
+      }
+
+      .user-desc {
+        font-size: 0.9em;
+        opacity: 0.8;
+        margin-top: 5px;
+      }
+
+      .actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .action-btn {
+        padding: 12px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9em;
+        transition: all 0.3s ease;
+      }
+
+      .action-btn:hover:not(:disabled) {
+        background: #2980b9;
+        transform: translateY(-1px);
+      }
+
+      .action-btn:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+      }
+
+      .results {
+        background: #2c3e50;
+        color: white;
+        border-radius: 8px;
+        padding: 20px;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      .log-entry {
+        margin-bottom: 10px;
+        padding: 8px;
+        border-radius: 4px;
+        border-left: 4px solid;
+      }
+
+      .log-allowed {
+        background: rgba(39, 174, 96, 0.1);
+        border-left-color: #27ae60;
+      }
+
+      .log-blocked {
+        background: rgba(231, 76, 60, 0.1);
+        border-left-color: #e74c3c;
+      }
+
+      .log-timestamp {
+        opacity: 0.7;
+        font-size: 0.8em;
+      }
+
+      .permissions {
+        background: #ecf0f1;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+
+      .service-perms {
+        margin-bottom: 10px;
+      }
+
+      .service-name {
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .methods {
+        margin-left: 20px;
+        font-size: 0.9em;
+        color: #7f8c8d;
+      }
+
+      .clear-btn {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9em;
+        margin-bottom: 15px;
+      }
+
+      .clear-btn:hover {
+        background: #c0392b;
+      }
+
+      .iframe-notice {
+        background: #f39c12;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        display: none;
+      }
+
+      .iframe-notice.show {
+        display: block;
+      }
+
+      .open-tab-btn {
+        background: #e67e22;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-left: 10px;
+        font-weight: bold;
+      }
+
+      .open-tab-btn:hover {
+        background: #d35400;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="iframe-notice" id="iframeNotice">
+      📱 For better scrolling experience:
+      <button class="open-tab-btn" onclick="openInNewTab()">
+        Open in New Tab
+      </button>
+    </div>
+
+    <div class="container">
+      <div class="header">
+        <h1>🔐 MCP Gateway Auth Control</h1>
+        <p>
+          Interactive demonstration of role-based access control for AI agents
+        </p>
+      </div>
+
+      <div class="content">
+        <div class="left-panel">
+          <div class="section">
+            <h3>👤 Select User Role</h3>
+            <div class="user-selector" id="userSelector">
+              <!-- Users will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <div class="section" id="permissionsSection" style="display: none">
+            <h3>🛡️ Current Permissions</h3>
+            <div class="permissions" id="permissions">
+              <!-- Permissions will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <div class="section" id="actionsSection" style="display: none">
+            <h3>🎯 Test Actions</h3>
+            <div class="actions-grid" id="actionsGrid">
+              <!-- Actions will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+
+        <div class="right-panel">
+          <div class="section">
+            <h3>📊 Live Audit Log</h3>
+            <button class="clear-btn" onclick="clearResults()">
+              Clear Log
+            </button>
+            <div class="results" id="results">
+              <div style="opacity: 0.7; text-align: center; padding: 20px">
+                Select a user role and start testing actions...
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentUser = null;
+      let policies = {};
+      let services = {};
+
+      // Initialize the app
+      async function init() {
+        await loadPolicies();
+        await loadServices();
+        renderUsers();
+      }
+
+      async function loadPolicies() {
+        const response = await fetch("/api/policies");
+        const data = await response.json();
+        policies = {};
+        data.forEach((policy) => {
+          policies[policy.user] = policy;
+        });
+      }
+
+      async function loadServices() {
+        const response = await fetch("/api/services");
+        services = await response.json();
+      }
+
+      function renderUsers() {
+        const selector = document.getElementById("userSelector");
+        const userDescriptions = {
+          ADMIN: "Full access to all enterprise services",
+          DEV: "Access to development and collaboration tools",
+          SALES: "Access to sales and customer management tools",
+          RESTRICTED: "Limited access to basic communication",
+        };
+
+        selector.innerHTML = Object.keys(policies)
+          .map((user) => {
+            const displayName = policies[user].displayName;
+            return `
+                    <div class="user-btn" onclick="selectUser('${user}')">
+                        <div class="user-title">${displayName} USER</div>
+                        <div class="user-desc">${userDescriptions[displayName]}</div>
+                    </div>
+                `;
+          })
+          .join("");
+      }
+
+      function selectUser(user) {
+        currentUser = user;
+
+        // Update UI
+        document
+          .querySelectorAll(".user-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        event.target.closest(".user-btn").classList.add("active");
+
+        // Show permissions and actions
+        document.getElementById("permissionsSection").style.display = "block";
+        document.getElementById("actionsSection").style.display = "block";
+
+        renderPermissions();
+        renderActions();
+      }
+
+      function renderPermissions() {
+        const perms = document.getElementById("permissions");
+        const userPerms = policies[currentUser].permissions;
+
+        perms.innerHTML = Object.keys(userPerms)
+          .map((service) => {
+            const methods = userPerms[service];
+            if (methods.length === 0) {
+              return `
+                        <div class="service-perms">
+                            <span class="service-name">${service.toUpperCase()}:</span>
+                            <div class="methods">❌ No access</div>
+                        </div>
+                    `;
+            }
+            return `
+                    <div class="service-perms">
+                        <span class="service-name">${service.toUpperCase()}:</span>
+                        <div class="methods">✅ ${methods.join(", ")}</div>
+                    </div>
+                `;
+          })
+          .join("");
+      }
+
+      function renderActions() {
+        const actionsGrid = document.getElementById("actionsGrid");
+        const userPerms = policies[currentUser].permissions;
+
+        const allActions = [];
+        services.forEach((serviceObj) => {
+          serviceObj.methods.forEach((method) => {
+            const isAllowed = (userPerms[serviceObj.service] || []).includes(
+              method
+            );
+            allActions.push({
+              service: serviceObj.service,
+              method: method,
+              allowed: isAllowed,
+              display: `${serviceObj.service}.${method}`.replace(/-/g, " "),
+            });
+          });
+        });
+
+        actionsGrid.innerHTML = allActions
+          .map(
+            (action) => `
+                <button class="action-btn ${!action.allowed ? "" : ""}" 
+                        onclick="testAction('${action.service}.${
+              action.method
+            }')"
+                        title="${
+                          action.allowed ? "Allowed" : "Will be blocked"
+                        }">
+                    ${action.allowed ? "✅" : "❌"} ${action.display}
+                </button>
+            `
+          )
+          .join("");
+      }
+
+      async function testAction(method) {
+        if (!currentUser) return;
+
+        const resultDiv = document.getElementById("results");
+
+        try {
+          const response = await fetch("/mcp", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${currentUser}`,
+            },
+            body: JSON.stringify({ method }),
+          });
+
+          const data = await response.json();
+          const timestamp = new Date().toLocaleTimeString();
+
+          let logEntry;
+          if (response.ok) {
+            const message = data.result.content[0].text;
+            logEntry = `
+                        <div class="log-entry log-allowed">
+                            <div class="log-timestamp">[${timestamp}]</div>
+                            <div><strong>${currentUser}</strong> → <strong>${method}</strong></div>
+                            <div>${message}</div>
+                        </div>
+                    `;
+          } else {
+            logEntry = `
+                        <div class="log-entry log-blocked">
+                            <div class="log-timestamp">[${timestamp}]</div>
+                            <div><strong>${currentUser}</strong> → <strong>${method}</strong></div>
+                            <div>${data.error}</div>
+                        </div>
+                    `;
+          }
+
+          resultDiv.innerHTML = logEntry + resultDiv.innerHTML;
+        } catch (error) {
+          console.error("Request failed:", error);
+          const timestamp = new Date().toLocaleTimeString();
+          const errorEntry = `
+                    <div class="log-entry log-blocked">
+                        <div class="log-timestamp">[${timestamp}]</div>
+                        <div>❌ Request failed: ${error.message}</div>
+                    </div>
+                `;
+          resultDiv.innerHTML = errorEntry + resultDiv.innerHTML;
+        }
+      }
+
+      function clearResults() {
+        document.getElementById("results").innerHTML = `
+                <div style="opacity: 0.7; text-align: center; padding: 20px;">
+                    Audit log cleared. Select actions to test...
+                </div>
+            `;
+      }
+
+      // Initialize when page loads
+      init();
+
+      // Check if we're in an iframe and show notice
+      if (window.self !== window.top) {
+        document.getElementById("iframeNotice").classList.add("show");
+      }
+
+      function openInNewTab() {
+        window.open(window.location.href, "_blank");
+      }
+    </script>
+  </body>
+</html>
