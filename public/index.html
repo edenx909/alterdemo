@@ -4,493 +4,2135 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MCP Gateway Auth Control Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "eva-lime": "#ceff1a",
+              "longinus-red": "#f23f42",
+              "impact-grey": "#2d2d2d",
+              "morph-red": "#f2777a",
+              "langley-white": "#cccccc",
+              "n2-grey": "#4d4d4d",
+            },
+            fontFamily: {
+              nk57: ["NK57", "Courier", "monospace"],
+            },
+            animation: {
+              "fade-in": "fadeIn 0.5s ease-in-out",
+              "slide-up": "slideUp 0.3s ease-out",
+            },
+          },
+        },
+      };
+    </script>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+      :root {
+        --eva-lime: #ceff1a;
+        --longinus-red: #f23f42;
+        --impact-grey: #2d2d2d;
+        --morph-red: #f2777a;
+        --langley-white: #cccccc;
+        --n2-grey: #4d4d4d;
       }
 
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 20px;
-      }
-
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-      }
-
-      .header {
-        background: linear-gradient(135deg, #2c3e50, #34495e);
-        color: white;
-        padding: 30px;
-        text-align: center;
-      }
-
-      .header h1 {
-        font-size: 2.5em;
-        margin-bottom: 10px;
+      @font-face {
+        font-family: "NK57";
         font-weight: 300;
+        src: url("/fonts/NK57Light.otf") format("opentype");
       }
 
-      .content {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0;
-        min-height: 70vh;
+      @font-face {
+        font-family: "NK57";
+        font-weight: 400;
+        src: url("/fonts/NK57-ScBk.otf") format("opentype");
       }
 
-      .left-panel {
-        padding: 30px;
-        background: #f8f9fa;
-        border-right: 1px solid #e9ecef;
+      @font-face {
+        font-family: "NK57";
+        font-weight: 600;
+        src: url("/fonts/NK57-ScRg.otf") format("opentype");
       }
 
-      .right-panel {
-        padding: 30px;
-        background: white;
+      @font-face {
+        font-family: "NK57";
+        font-weight: 700;
+        src: url("/fonts/NK57-NoBd.otf") format("opentype");
       }
 
-      .section {
-        margin-bottom: 30px;
+      @font-face {
+        font-family: "FortuneCity";
+        src: url("/fonts/FortuneCity.ttf") format("truetype");
       }
 
-      .section h3 {
-        color: #2c3e50;
-        margin-bottom: 15px;
-        font-size: 1.3em;
-        border-bottom: 2px solid #3498db;
-        padding-bottom: 5px;
+      * {
+        letter-spacing: 0rem;
+        font-family: "NK57", Courier, monospace;
       }
 
-      .user-selector {
-        display: grid;
-        gap: 10px;
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
-      .user-btn {
-        padding: 15px;
-        border: 2px solid #ddd;
-        background: white;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-align: left;
-      }
-
-      .user-btn:hover {
-        border-color: #3498db;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-      }
-
-      .user-btn.active {
-        border-color: #3498db;
-        background: #3498db;
-        color: white;
-      }
-
-      .user-title {
-        font-weight: bold;
-        font-size: 1.1em;
-      }
-
-      .user-desc {
-        font-size: 0.9em;
-        opacity: 0.8;
-        margin-top: 5px;
-      }
-
-      .actions-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        margin-top: 20px;
-      }
-
-      .action-btn {
-        padding: 12px;
-        background: #3498db;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.9em;
-        transition: all 0.3s ease;
-      }
-
-      .action-btn:hover:not(:disabled) {
-        background: #2980b9;
-        transform: translateY(-1px);
-      }
-
-      .action-btn:disabled {
-        background: #bdc3c7;
-        cursor: not-allowed;
-      }
-
-      .results {
-        background: #2c3e50;
-        color: white;
-        border-radius: 8px;
-        padding: 20px;
-        max-height: 300px;
-        overflow-y: auto;
-        font-family: "Courier New", monospace;
-        font-size: 14px;
-        line-height: 1.4;
-      }
-
-      .log-entry {
-        margin-bottom: 10px;
-        padding: 8px;
-        border-radius: 4px;
-        border-left: 4px solid;
-      }
-
-      .log-allowed {
-        background: rgba(39, 174, 96, 0.1);
-        border-left-color: #27ae60;
-      }
-
-      .log-blocked {
-        background: rgba(231, 76, 60, 0.1);
-        border-left-color: #e74c3c;
-      }
-
-      .log-timestamp {
-        opacity: 0.7;
-        font-size: 0.8em;
-      }
-
-      .permissions {
-        background: #ecf0f1;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 20px;
-      }
-
-      .service-perms {
-        margin-bottom: 10px;
-      }
-
-      .service-name {
-        font-weight: bold;
-        color: #2c3e50;
-      }
-
-      .methods {
-        margin-left: 20px;
-        font-size: 0.9em;
-        color: #7f8c8d;
-      }
-
-      .clear-btn {
-        background: #e74c3c;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 0.9em;
-        margin-bottom: 15px;
-      }
-
-      .clear-btn:hover {
-        background: #c0392b;
-      }
-
-      .iframe-notice {
-        background: #f39c12;
-        color: white;
-        padding: 10px;
-        text-align: center;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
+      .no-scrollbar::-webkit-scrollbar {
         display: none;
       }
-
-      .iframe-notice.show {
-        display: block;
-      }
-
-      .open-tab-btn {
-        background: #e67e22;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-left: 10px;
-        font-weight: bold;
-      }
-
-      .open-tab-btn:hover {
-        background: #d35400;
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
       }
     </style>
   </head>
-  <body>
-    <div class="iframe-notice" id="iframeNotice">
-      📱 For better scrolling experience:
-      <button class="open-tab-btn" onclick="openInNewTab()">
-        Open in New Tab
-      </button>
-    </div>
+  <body class="bg-impact-grey min-h-screen max-h-screen font-nk57 flex flex-col">
+    <div class="container mx-auto px-2 py-3 flex-1 flex flex-col max-h-screen overflow-hidden">
+      <!-- Header -->
+      <header
+        class="bg-impact-grey border border-n2-grey rounded-xl shadow-2xl mb-8 animate-fade-in"
+      >
+        <div class="px-4 py-4">
+          <h1
+            class="text-4xl font-bold text-eva-lime text-center mb-2 tracking-wide"
+          >
+            MCP GATEWAY AUTH CONTROL
+          </h1>
 
-    <div class="container">
-      <div class="header">
-        <h1>🔐 MCP Gateway Auth Control</h1>
-        <p>
-          Interactive demonstration of role-based access control for AI agents
-        </p>
-      </div>
-
-      <div class="content">
-        <div class="left-panel">
-          <div class="section">
-            <h3>👤 Select User Role</h3>
-            <div class="user-selector" id="userSelector">
-              <!-- Users will be populated by JavaScript -->
+          <div class="flex justify-center space-x-8 mt-6">
+            <div
+              class="text-center p-3 bg-impact-grey border border-n2-grey rounded-lg"
+            >
+              <span
+                class="block text-2xl font-bold text-eva-lime"
+                id="totalIdentities"
+                >4</span
+              >
+              <span class="text-xs text-langley-white uppercase tracking-wider"
+                >IDENTITIES</span
+              >
             </div>
-          </div>
-
-          <div class="section" id="permissionsSection" style="display: none">
-            <h3>🛡️ Current Permissions</h3>
-            <div class="permissions" id="permissions">
-              <!-- Permissions will be populated by JavaScript -->
+            <div
+              class="text-center p-3 bg-impact-grey border border-n2-grey rounded-lg"
+            >
+              <span
+                class="block text-2xl font-bold text-eva-lime"
+                id="activePolicies"
+                >6</span
+              >
+              <span class="text-xs text-langley-white uppercase tracking-wider"
+                >POLICIES</span
+              >
             </div>
-          </div>
-
-          <div class="section" id="actionsSection" style="display: none">
-            <h3>🎯 Test Actions</h3>
-            <div class="actions-grid" id="actionsGrid">
-              <!-- Actions will be populated by JavaScript -->
+            <div
+              class="text-center p-3 bg-impact-grey border border-n2-grey rounded-lg"
+            >
+              <span
+                class="block text-2xl font-bold text-eva-lime"
+                id="successRate"
+                >89%</span
+              >
+              <span class="text-xs text-langley-white uppercase tracking-wider"
+                >SUCCESS RATE</span
+              >
+            </div>
+            <div
+              class="text-center p-3 bg-impact-grey border border-n2-grey rounded-lg"
+            >
+              <span
+                class="block text-2xl font-bold text-eva-lime"
+                id="recentActions"
+                >12</span
+              >
+              <span class="text-xs text-langley-white uppercase tracking-wider"
+                >RECENT ACTIONS</span
+              >
             </div>
           </div>
         </div>
+      </header>
 
-        <div class="right-panel">
-          <div class="section">
-            <h3>📊 Live Audit Log</h3>
-            <button class="clear-btn" onclick="clearResults()">
-              Clear Log
-            </button>
-            <div class="results" id="results">
-              <div style="opacity: 0.7; text-align: center; padding: 20px">
-                Select a user role and start testing actions...
+      <!-- Tab Navigation -->
+      <nav
+        class="bg-impact-grey border border-n2-grey rounded-t-xl shadow-2xl animate-slide-up"
+      >
+        <div class="flex border-b border-n2-grey">
+          <button
+            class="tab-btn flex-1 px-6 py-4 text-center font-medium text-langley-white border-b-2 border-transparent hover:text-eva-lime hover:border-eva-lime transition-all duration-200 active uppercase tracking-wide"
+            data-tab="dashboard"
+          >
+            DASHBOARD
+          </button>
+          <button
+            class="tab-btn flex-1 px-6 py-4 text-center font-medium text-langley-white border-b-2 border-transparent hover:text-eva-lime hover:border-eva-lime transition-all duration-200 uppercase tracking-wide"
+            data-tab="identities"
+          >
+            IDENTITIES
+          </button>
+          <button
+            class="tab-btn flex-1 px-6 py-4 text-center font-medium text-langley-white border-b-2 border-transparent hover:text-eva-lime hover:border-eva-lime transition-all duration-200 uppercase tracking-wide"
+            data-tab="permissions"
+          >
+            PERMISSIONS
+          </button>
+          <button
+            class="tab-btn flex-1 px-6 py-4 text-center font-medium text-langley-white border-b-2 border-transparent hover:text-eva-lime hover:border-eva-lime transition-all duration-200 uppercase tracking-wide"
+            data-tab="policies"
+          >
+            POLICIES
+          </button>
+        </div>
+      </nav>
+
+      <!-- Tab Content -->
+      <main class="tab-content flex-1 flex flex-col overflow-hidden min-h-0">
+        <!-- Dashboard Tab -->
+        <div class="tab-panel flex-1 flex flex-col min-h-0" id="dashboard">
+          <div class="grid grid-cols-1 lg:grid-cols-2 flex-1 min-h-0">
+            <!-- Test Actions Section -->
+            <div
+              class="bg-impact-grey border border-n2-grey border-t-0 rounded-bl-xl shadow-2xl p-4"
+            >
+              <h3
+                class="text-xl font-semibold text-eva-lime mb-4 flex items-center uppercase tracking-wide"
+              >
+                <span>TEST ACTIONS</span>
+              </h3>
+
+              <div class="mb-4">
+                <label
+                  class="block text-sm font-medium text-langley-white mb-2 uppercase tracking-wide"
+                  >SELECT IDENTITY:</label
+                >
+                <select
+                  id="testIdentitySelect"
+                  class="w-full px-3 py-2 bg-impact-grey border border-n2-grey text-langley-white rounded-lg focus:ring-2 focus:ring-eva-lime focus:border-eva-lime"
+                >
+                  <option value="">CHOOSE AN IDENTITY...</option>
+                </select>
+              </div>
+
+              <div
+                id="currentPermissions"
+                class="mb-4 p-4 bg-impact-grey border border-n2-grey rounded-lg hidden"
+              >
+                <h4
+                  class="font-medium text-eva-lime mb-2 uppercase tracking-wide"
+                >
+                  CURRENT PERMISSIONS:
+                </h4>
+                <div
+                  id="permissionsList"
+                  class="space-y-1 text-sm text-langley-white"
+                ></div>
+              </div>
+
+              <div id="testActionsGrid" class="grid grid-cols-2 gap-3">
+                <!-- Action buttons will be populated here -->
+              </div>
+            </div>
+
+            <!-- Live Audit Log Section -->
+            <div
+              class="bg-impact-grey border border-n2-grey border-t-0 rounded-br-xl shadow-2xl p-4 flex flex-col min-h-0"
+            >
+              <div class="flex justify-between items-center mb-4">
+                <h3
+                  class="text-xl font-semibold text-eva-lime flex items-center uppercase tracking-wide"
+                >
+                  <span>LIVE AUDIT LOG</span>
+                </h3>
+                <div class="flex space-x-2">
+                  <button
+                    id="clearLogBtn"
+                    class="px-3 py-2 text-sm bg-longinus-red border border-longinus-red text-white rounded-md hover:bg-longinus-red/90 transition-colors font-semibold uppercase"
+                  >
+                    CLEAR LOG
+                  </button>
+                  <button
+                    id="exportCsvBtn"
+                    class="px-3 py-2 text-sm bg-eva-lime border border-eva-lime text-black rounded-md hover:bg-eva-lime/90 transition-colors font-semibold uppercase"
+                  >
+                    EXPORT CSV
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex space-x-2 mb-4">
+                <select
+                  id="filterIdentity"
+                  class="flex-1 px-2 py-1 text-sm bg-impact-grey border border-n2-grey text-langley-white rounded-md focus:ring-1 focus:ring-eva-lime focus:border-eva-lime"
+                >
+                  <option value="">ALL IDENTITIES</option>
+                </select>
+                <select
+                  id="filterStatus"
+                  class="flex-1 px-2 py-1 text-sm bg-impact-grey border border-n2-grey text-langley-white rounded-md focus:ring-1 focus:ring-eva-lime focus:border-eva-lime"
+                >
+                  <option value="">ALL STATUS</option>
+                  <option value="allowed">ALLOWED</option>
+                  <option value="blocked">BLOCKED</option>
+                </select>
+              </div>
+
+              <div
+                id="auditLogContainer"
+                class="bg-[#161616] border border-n2-grey text-eva-lime rounded-lg p-4 flex-1 overflow-y-auto font-mono text-sm [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-n2-grey [&::-webkit-scrollbar-thumb]:bg-n2-grey dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+              >
+                <div
+                  class="text-center text-langley-white py-8 uppercase tracking-wide"
+                >
+                  SELECT AN IDENTITY AND TEST ACTIONS TO SEE AUDIT LOGS...
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Identities Tab -->
+        <div class="tab-panel hidden flex-1 flex flex-col min-h-0" id="identities">
+          <div
+            class="bg-impact-grey border border-n2-grey border-t-0 rounded-b-xl shadow-2xl p-4 flex-1 overflow-y-auto min-h-0 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-n2-grey [&::-webkit-scrollbar-thumb]:bg-n2-grey dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+          >
+            <div class="flex justify-between items-center mb-6">
+              <h2
+                class="text-2xl font-semibold text-eva-lime flex items-center uppercase tracking-wide"
+              >
+                <span>IDENTITY MANAGEMENT</span>
+              </h2>
+              <button
+                id="createIdentityBtn"
+                class="bg-eva-lime border border-eva-lime px-4 py-2 text-black rounded-lg font-medium transition-colors hover:bg-eva-lime/90 uppercase tracking-wide"
+              >
+                + CREATE IDENTITY
+              </button>
+            </div>
+
+            <div
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
+            >
+              <div class="bg-impact-grey border border-n2-grey p-4 rounded-lg">
+                <div
+                  class="text-2xl font-bold text-eva-lime"
+                  id="totalIdentitiesCount"
+                >
+                  4
+                </div>
+                <div
+                  class="text-langley-white uppercase tracking-wider text-xs"
+                >
+                  TOTAL IDENTITIES
+                </div>
+              </div>
+              <div class="bg-impact-grey border border-n2-grey p-4 rounded-lg">
+                <div
+                  class="text-2xl font-bold text-eva-lime"
+                  id="activeIdentitiesCount"
+                >
+                  4
+                </div>
+                <div
+                  class="text-langley-white uppercase tracking-wider text-xs"
+                >
+                  ACTIVE
+                </div>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full table-auto">
+                <thead class="bg-impact-grey">
+                  <tr>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
+                    >
+                      Identity
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
+                    >
+                      Role Type
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
+                    >
+                      Status
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
+                    >
+                      Policies
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
+                    >
+                      Created
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="identitiesTableBody"
+                  class="bg-impact-grey divide-y divide-n2-grey"
+                >
+                  <!-- Identity rows will be populated here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Permissions Tab -->
+        <div class="tab-panel hidden flex-1 flex flex-col min-h-0" id="permissions">
+          <div
+            class="bg-impact-grey border border-n2-grey border-t-0 rounded-b-xl shadow-2xl p-4 flex-1 overflow-y-auto min-h-0 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-n2-grey [&::-webkit-scrollbar-thumb]:bg-n2-grey dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+          >
+            <div class="flex justify-between items-center mb-6">
+              <h2
+                class="text-2xl font-semibold text-eva-lime flex items-center uppercase tracking-wide"
+              >
+                <span>PERMISSION MATRIX</span>
+              </h2>
+              <div class="flex space-x-2">
+                <button
+                  id="resetPermissions"
+                  class="bg-longinus-red border border-longinus-red text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-longinus-red/90 uppercase tracking-wide"
+                >
+                  RESET ALL
+                </button>
+                <button
+                  id="savePermissions"
+                  class="bg-eva-lime border border-eva-lime text-black px-4 py-2 rounded-lg font-medium transition-colors hover:bg-eva-lime/90 uppercase tracking-wide"
+                >
+                  SAVE CHANGES
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full border-collapse border border-n2-grey">
+                <thead>
+                  <tr>
+                    <th
+                      class="border border-n2-grey px-2 py-3 text-white text-sm"
+                    >
+                      Identity
+                    </th>
+                    <th
+                      class="border border-n2-grey px-2 py-3 text-white text-sm"
+                      colspan="2"
+                    >
+                      Slack
+                    </th>
+                    <th
+                      class="border border-n2-grey px-2 py-3 text-white text-sm"
+                      colspan="2"
+                    >
+                      Salesforce
+                    </th>
+                    <th
+                      class="border border-n2-grey px-2 py-3 text-white text-sm"
+                      colspan="2"
+                    >
+                      GitHub
+                    </th>
+                    <th
+                      class="border border-n2-grey px-2 py-3 text-white text-sm"
+                      colspan="2"
+                    >
+                      Jira
+                    </th>
+                  </tr>
+                  <tr>
+                    <th class="border border-n2-grey"></th>
+                    <th
+                      class="border border-n2-grey px-2 py-2 text-white text-xs"
+                    >
+                      send-message
+                    </th>
+                    <th
+                      class="border border-n2-grey px-2 py-2 text-white text-xs"
+                    >
+                      create-channel
+                    </th>
+                    <th
+                      class="border border-n2-grey px-2 py-2 text-white text-xs"
+                    >
+                      create-lead
+                    </th>
+                    <th
+                      class="border border-n2-grey px-2 py-2 text-white text-xs"
+                    >
+                      update-contact
+                    </th>
+                    <th
+                      class="border border-n2-grey px-2 py-2 text-white text-xs"
+                    >
+                      create-issue
+                    </th>
+                    <th
+                      class="border border-n2-grey px-2 py-2 text-white text-xs"
+                    >
+                      create-pr
+                    </th>
+                    <th
+                      class="border border-n2-grey px-2 py-2 text-white text-xs"
+                    >
+                      create-ticket
+                    </th>
+                    <th
+                      class="border border-n2-grey px-2 py-2 text-white text-xs"
+                    >
+                      update-status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="permissionsMatrixBody">
+                  <!-- Matrix rows will be populated here -->
+                </tbody>
+              </table>
+            </div>
+
+            <div
+              class="flex justify-center space-x-6 mt-4 text-sm text-langley-white"
+            >
+              <div class="flex items-center">
+                <div class="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                <span>ALLOWED (POLICY)</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-4 h-4 bg-red-500 rounded mr-2"></div>
+                <span>DENIED (POLICY)</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-4 h-4 bg-purple-600 rounded mr-2"></div>
+                <span>CUSTOM OVERRIDE</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-4 h-4 bg-gray-500 rounded mr-2"></div>
+                <span>NO POLICY</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Policies Tab -->
+        <div class="tab-panel hidden flex-1 flex flex-col min-h-0" id="policies">
+          <div
+            class="bg-impact-grey border border-n2-grey border-t-0 rounded-b-xl shadow-2xl p-4 flex-1 overflow-y-auto min-h-0 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-n2-grey [&::-webkit-scrollbar-thumb]:bg-n2-grey dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+          >
+            <div class="flex justify-between items-center mb-6">
+              <h2
+                class="text-2xl font-semibold text-eva-lime flex items-center uppercase tracking-wide"
+              >
+                <span>POLICY MANAGEMENT</span>
+              </h2>
+              <button
+                id="createPolicyBtn"
+                class="bg-eva-lime border border-eva-lime text-black px-4 py-2 rounded-lg font-medium transition-colors hover:bg-eva-lime/90 uppercase tracking-wide"
+              >
+                + CREATE POLICY
+              </button>
+            </div>
+
+            <div
+              id="policiesGrid"
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              <!-- Policy cards will be populated here -->
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Identity Modal -->
+    <div
+      id="identityModal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50"
+    >
+      <div
+        class="bg-impact-grey border border-n2-grey rounded-xl shadow-2xl max-w-md w-full mx-4 max-h-screen overflow-y-auto"
+      >
+        <div class="px-6 py-4 border-b border-n2-grey">
+          <h3
+            id="identityModalTitle"
+            class="text-lg font-semibold text-eva-lime uppercase tracking-wide"
+          >
+            CREATE IDENTITY
+          </h3>
+          <button
+            id="closeIdentityModal"
+            class="absolute top-4 right-4 text-langley-white hover:text-eva-lime"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <form id="identityForm" class="px-6 py-4 space-y-4">
+          <input type="hidden" id="editingIdentityId" value="" />
+
+          <div class="form-group">
+            <label
+              class="block text-sm font-medium text-langley-white mb-2 uppercase tracking-wide"
+              >Identity Name</label
+            >
+            <input
+              type="text"
+              id="identityName"
+              required
+              class="w-full px-3 py-2 bg-impact-grey border border-n2-grey text-langley-white rounded-lg focus:ring-2 focus:ring-eva-lime focus:border-eva-lime"
+              placeholder="Enter identity name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label
+              class="block text-sm font-medium text-langley-white mb-2 uppercase tracking-wide"
+              >Role Type</label
+            >
+            <select
+              id="identityRoleType"
+              required
+              class="w-full px-3 py-2 bg-impact-grey border border-n2-grey text-langley-white rounded-lg focus:ring-2 focus:ring-eva-lime focus:border-eva-lime"
+            >
+              <option value="">Select role type...</option>
+              <option value="admin">Admin</option>
+              <option value="dev">Developer</option>
+              <option value="sales">Sales</option>
+              <option value="restricted">Restricted</option>
+              <option value="custom">Custom Role</option>
+            </select>
+          </div>
+
+          <div id="customRoleGroup" class="form-group hidden">
+            <label
+              class="block text-sm font-medium text-langley-white mb-2 uppercase tracking-wide"
+              >Custom Role Name</label
+            >
+            <input
+              type="text"
+              id="customRoleName"
+              class="w-full px-3 py-2 bg-impact-grey border border-n2-grey text-langley-white rounded-lg focus:ring-2 focus:ring-eva-lime focus:border-eva-lime"
+              placeholder="Enter custom role name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label
+              class="block text-sm font-medium text-langley-white mb-2 uppercase tracking-wide"
+              >Assign Policy</label
+            >
+            <select
+              id="identityPolicy"
+              class="w-full px-3 py-2 bg-impact-grey border border-n2-grey text-langley-white rounded-lg focus:ring-2 focus:ring-eva-lime focus:border-eva-lime"
+            >
+              <option value="">No Policy (Custom permissions only)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label
+              class="block text-sm font-medium text-langley-white mb-2 uppercase tracking-wide"
+              >Status</label
+            >
+            <select
+              id="identityStatus"
+              class="w-full px-3 py-2 bg-impact-grey border border-n2-grey text-langley-white rounded-lg focus:ring-2 focus:ring-eva-lime focus:border-eva-lime"
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+
+          <div class="flex justify-end space-x-3 pt-4 border-t border-n2-grey">
+            <button
+              type="button"
+              id="cancelIdentityModal"
+              class="px-4 py-2 text-sm font-medium text-langley-white bg-impact-grey border border-n2-grey rounded-lg hover:bg-impact-grey/80 transition-colors uppercase tracking-wide"
+            >
+              CANCEL
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 text-sm font-medium text-black bg-eva-lime border border-eva-lime rounded-lg hover:bg-eva-lime/90 transition-colors uppercase tracking-wide"
+            >
+              SAVE IDENTITY
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Policy Modal -->
+    <div
+      id="policyModal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50"
+    >
+      <div
+        class="bg-impact-grey border border-n2-grey rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto"
+      >
+        <div class="px-6 py-4 border-b border-n2-grey">
+          <h3
+            id="policyModalTitle"
+            class="text-lg font-semibold text-eva-lime uppercase tracking-wide"
+          >
+            CREATE POLICY
+          </h3>
+          <button
+            id="closePolicyModal"
+            class="absolute top-4 right-4 text-langley-white hover:text-eva-lime"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <form id="policyForm" class="px-6 py-4 space-y-4">
+          <input type="hidden" id="editingPolicyId" value="" />
+
+          <div class="form-group">
+            <label
+              class="block text-sm font-medium text-langley-white mb-2 uppercase tracking-wide"
+              >Policy Name</label
+            >
+            <input
+              type="text"
+              id="policyName"
+              required
+              class="w-full px-3 py-2 bg-impact-grey border border-n2-grey text-langley-white rounded-lg focus:ring-2 focus:ring-eva-lime focus:border-eva-lime"
+              placeholder="Enter policy name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label
+              class="block text-sm font-medium text-langley-white mb-2 uppercase tracking-wide"
+              >Description</label
+            >
+            <textarea
+              id="policyDescription"
+              rows="3"
+              class="w-full px-3 py-2 bg-impact-grey border border-n2-grey text-langley-white rounded-lg focus:ring-2 focus:ring-eva-lime focus:border-eva-lime"
+              placeholder="Describe this policy..."
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label
+              class="block text-sm font-medium text-langley-white mb-2 uppercase tracking-wide"
+              >Template (Optional)</label
+            >
+            <select
+              id="policyTemplate"
+              class="w-full px-3 py-2 bg-impact-grey border border-n2-grey text-langley-white rounded-lg focus:ring-2 focus:ring-eva-lime focus:border-eva-lime"
+            >
+              <option value="">Start from scratch</option>
+              <option value="developer-standard">Developer Standard</option>
+              <option value="sales-team">Sales Team</option>
+              <option value="external-contractor">External Contractor</option>
+              <option value="admin-full-access">Admin Full Access</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label
+              class="block text-sm font-medium text-langley-white mb-2 uppercase tracking-wide"
+              >Permissions Configuration</label
+            >
+            <div
+              id="policyPermissionsConfig"
+              class="space-y-3 bg-impact-grey border border-n2-grey p-4 rounded-lg"
+            >
+              <!-- Slack Permissions -->
+              <div class="border-b border-n2-grey pb-3">
+                <h4
+                  class="font-medium text-eva-lime mb-2 uppercase tracking-wide"
+                >
+                  Slack
+                </h4>
+                <div class="space-y-2">
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      class="permission-checkbox rounded mr-2"
+                      data-permission="slack.send-message"
+                    />
+                    <span class="text-sm text-langley-white"
+                      >Send Messages</span
+                    >
+                  </label>
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      class="permission-checkbox rounded mr-2"
+                      data-permission="slack.create-channel"
+                    />
+                    <span class="text-sm text-langley-white"
+                      >Create Channels</span
+                    >
+                  </label>
+                </div>
+              </div>
+
+              <!-- GitHub Permissions -->
+              <div class="border-b border-n2-grey pb-3">
+                <h4
+                  class="font-medium text-eva-lime mb-2 uppercase tracking-wide"
+                >
+                  GitHub
+                </h4>
+                <div class="space-y-2">
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      class="permission-checkbox rounded mr-2"
+                      data-permission="github.create-issue"
+                    />
+                    <span class="text-sm text-langley-white"
+                      >Create Issues</span
+                    >
+                  </label>
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      class="permission-checkbox rounded mr-2"
+                      data-permission="github.create-pr"
+                    />
+                    <span class="text-sm text-langley-white"
+                      >Create Pull Requests</span
+                    >
+                  </label>
+                </div>
+              </div>
+
+              <!-- Jira Permissions -->
+              <div class="border-b border-n2-grey pb-3">
+                <h4
+                  class="font-medium text-eva-lime mb-2 uppercase tracking-wide"
+                >
+                  Jira
+                </h4>
+                <div class="space-y-2">
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      class="permission-checkbox rounded mr-2"
+                      data-permission="jira.create-ticket"
+                    />
+                    <span class="text-sm text-langley-white"
+                      >Create Tickets</span
+                    >
+                  </label>
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      class="permission-checkbox rounded mr-2"
+                      data-permission="jira.update-status"
+                    />
+                    <span class="text-sm text-langley-white"
+                      >Update Status</span
+                    >
+                  </label>
+                </div>
+              </div>
+
+              <!-- Salesforce Permissions -->
+              <div>
+                <h4
+                  class="font-medium text-eva-lime mb-2 uppercase tracking-wide"
+                >
+                  Salesforce
+                </h4>
+                <div class="space-y-2">
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      class="permission-checkbox rounded mr-2"
+                      data-permission="salesforce.create-lead"
+                    />
+                    <span class="text-sm text-langley-white">Create Leads</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      class="permission-checkbox rounded mr-2"
+                      data-permission="salesforce.update-contact"
+                    />
+                    <span class="text-sm text-langley-white"
+                      >Update Contacts</span
+                    >
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end space-x-3 pt-4 border-t border-n2-grey">
+            <button
+              type="button"
+              id="cancelPolicyModal"
+              class="px-4 py-2 text-sm font-medium text-langley-white bg-impact-grey border border-n2-grey rounded-lg hover:bg-impact-grey/80 transition-colors uppercase tracking-wide"
+            >
+              CANCEL
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 text-sm font-medium text-black bg-eva-lime border border-eva-lime rounded-lg hover:bg-eva-lime/90 transition-colors uppercase tracking-wide"
+            >
+              SAVE POLICY
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
     <script>
-      let currentUser = null;
-      let policies = {};
-      let services = {};
+      // Enhanced Data Models - Now connected to backend
+      class MCPGatewayApp {
+        constructor() {
+          this.identities = [];
+          this.policies = [];
+          this.auditLogs = [];
+          this.currentTab = "dashboard";
+          this.init();
+        }
 
-      // Initialize the app
-      async function init() {
-        await loadPolicies();
-        await loadServices();
-        renderUsers();
-      }
+        async init() {
+          this.setupEventListeners();
+          await this.loadDataFromServer();
+          this.renderDashboard();
+          this.renderCurrentTab(); // Make sure current tab is rendered with data
+          this.updateMetrics();
+        }
 
-      async function loadPolicies() {
-        const response = await fetch("/api/policies");
-        const data = await response.json();
-        policies = {};
-        data.forEach((policy) => {
-          policies[policy.user] = policy;
-        });
-      }
+        // Load data from server APIs
+        async loadDataFromServer() {
+          try {
+            // Load identities
+            const identitiesResponse = await fetch("/api/identities");
+            this.identities = await identitiesResponse.json();
+            console.log("Loaded identities:", this.identities);
 
-      async function loadServices() {
-        const response = await fetch("/api/services");
-        services = await response.json();
-      }
+            // Load policies
+            const policiesResponse = await fetch("/api/policies");
+            this.policies = await policiesResponse.json();
+            console.log("Loaded policies:", this.policies);
 
-      function renderUsers() {
-        const selector = document.getElementById("userSelector");
-        const userDescriptions = {
-          ADMIN: "Full access to all enterprise services",
-          DEV: "Access to development and collaboration tools",
-          SALES: "Access to sales and customer management tools",
-          RESTRICTED: "Limited access to basic communication",
-        };
+            // Load audit logs
+            const logsResponse = await fetch("/api/logs");
+            this.auditLogs = await logsResponse.json();
+            console.log("Loaded audit logs:", this.auditLogs);
+          } catch (error) {
+            console.error("Error loading data from server:", error);
+          }
+        }
 
-        selector.innerHTML = Object.keys(policies)
-          .map((user) => {
-            const displayName = policies[user].displayName;
-            return `
-                    <div class="user-btn" onclick="selectUser('${user}')">
-                        <div class="user-title">${displayName} USER</div>
-                        <div class="user-desc">${userDescriptions[displayName]}</div>
-                    </div>
-                `;
-          })
-          .join("");
-      }
-
-      function selectUser(user) {
-        currentUser = user;
-
-        // Update UI
-        document
-          .querySelectorAll(".user-btn")
-          .forEach((btn) => btn.classList.remove("active"));
-        event.target.closest(".user-btn").classList.add("active");
-
-        // Show permissions and actions
-        document.getElementById("permissionsSection").style.display = "block";
-        document.getElementById("actionsSection").style.display = "block";
-
-        renderPermissions();
-        renderActions();
-      }
-
-      function renderPermissions() {
-        const perms = document.getElementById("permissions");
-        const userPerms = policies[currentUser].permissions;
-
-        perms.innerHTML = Object.keys(userPerms)
-          .map((service) => {
-            const methods = userPerms[service];
-            if (methods.length === 0) {
-              return `
-                        <div class="service-perms">
-                            <span class="service-name">${service.toUpperCase()}:</span>
-                            <div class="methods">❌ No access</div>
-                        </div>
-                    `;
-            }
-            return `
-                    <div class="service-perms">
-                        <span class="service-name">${service.toUpperCase()}:</span>
-                        <div class="methods">✅ ${methods.join(", ")}</div>
-                    </div>
-                `;
-          })
-          .join("");
-      }
-
-      function renderActions() {
-        const actionsGrid = document.getElementById("actionsGrid");
-        const userPerms = policies[currentUser].permissions;
-
-        const allActions = [];
-        services.forEach((serviceObj) => {
-          serviceObj.methods.forEach((method) => {
-            const isAllowed = (userPerms[serviceObj.service] || []).includes(
-              method
-            );
-            allActions.push({
-              service: serviceObj.service,
-              method: method,
-              allowed: isAllowed,
-              display: `${serviceObj.service}.${method}`.replace(/-/g, " "),
+        setupEventListeners() {
+          // Tab navigation
+          document.querySelectorAll(".tab-btn").forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+              const tabName = e.target.dataset.tab;
+              this.switchTab(tabName);
             });
           });
-        });
 
-        actionsGrid.innerHTML = allActions
-          .map(
-            (action) => `
-                <button class="action-btn ${!action.allowed ? "" : ""}" 
-                        onclick="testAction('${action.service}.${
-              action.method
-            }')"
-                        title="${
-                          action.allowed ? "Allowed" : "Will be blocked"
-                        }">
-                    ${action.allowed ? "✅" : "❌"} ${action.display}
-                </button>
-            `
-          )
-          .join("");
-      }
-
-      async function testAction(method) {
-        if (!currentUser) return;
-
-        const resultDiv = document.getElementById("results");
-
-        try {
-          const response = await fetch("/mcp", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${currentUser}`,
-            },
-            body: JSON.stringify({ method }),
-          });
-
-          const data = await response.json();
-          const timestamp = new Date().toLocaleTimeString();
-
-          let logEntry;
-          if (response.ok) {
-            const message = data.result.content[0].text;
-            logEntry = `
-                        <div class="log-entry log-allowed">
-                            <div class="log-timestamp">[${timestamp}]</div>
-                            <div><strong>${currentUser}</strong> → <strong>${method}</strong></div>
-                            <div>${message}</div>
-                        </div>
-                    `;
-          } else {
-            logEntry = `
-                        <div class="log-entry log-blocked">
-                            <div class="log-timestamp">[${timestamp}]</div>
-                            <div><strong>${currentUser}</strong> → <strong>${method}</strong></div>
-                            <div>${data.error}</div>
-                        </div>
-                    `;
+          // Test identity selector
+          const identitySelect = document.getElementById("testIdentitySelect");
+          if (identitySelect) {
+            identitySelect.addEventListener("change", (e) => {
+              this.handleIdentitySelection(e.target.value);
+            });
           }
 
-          resultDiv.innerHTML = logEntry + resultDiv.innerHTML;
-        } catch (error) {
-          console.error("Request failed:", error);
-          const timestamp = new Date().toLocaleTimeString();
-          const errorEntry = `
-                    <div class="log-entry log-blocked">
-                        <div class="log-timestamp">[${timestamp}]</div>
-                        <div>❌ Request failed: ${error.message}</div>
-                    </div>
+          // Clear log button
+          const clearLogBtn = document.getElementById("clearLogBtn");
+          if (clearLogBtn) {
+            clearLogBtn.addEventListener("click", () => {
+              this.clearAuditLog();
+            });
+          }
+
+          // Identity modal events
+          this.setupIdentityModalEvents();
+
+          // Policy modal events
+          this.setupPolicyModalEvents();
+
+          // Permission matrix events
+          this.setupPermissionMatrixEvents();
+
+          // CSV export button
+          const exportBtn = document.getElementById("exportCsvBtn");
+          if (exportBtn) {
+            exportBtn.addEventListener("click", () => {
+              this.exportAuditLogToCsv();
+            });
+          }
+
+          // Audit log filters
+          this.setupAuditLogFilters();
+
+          // Permission matrix control buttons
+          const resetPermissions = document.getElementById("resetPermissions");
+          if (resetPermissions) {
+            resetPermissions.addEventListener("click", () => {
+              this.resetAllPermissions();
+            });
+          }
+
+          const savePermissions = document.getElementById("savePermissions");
+          if (savePermissions) {
+            savePermissions.addEventListener("click", () => {
+              this.savePermissions();
+            });
+          }
+        }
+
+        switchTab(tabName) {
+          // Update active tab button
+          document.querySelectorAll(".tab-btn").forEach((btn) => {
+            if (btn.dataset.tab === tabName) {
+              btn.classList.add("text-eva-lime", "border-eva-lime");
+              btn.classList.remove("text-langley-white", "border-transparent");
+            } else {
+              btn.classList.remove("text-eva-lime", "border-eva-lime");
+              btn.classList.add("text-langley-white", "border-transparent");
+            }
+          });
+
+          // Show/hide tab panels
+          document.querySelectorAll(".tab-panel").forEach((panel) => {
+            if (panel.id === tabName) {
+              panel.classList.remove("hidden");
+            } else {
+              panel.classList.add("hidden");
+            }
+          });
+
+          this.currentTab = tabName;
+          this.renderCurrentTab();
+        }
+
+        setupIdentityModalEvents() {
+          // Create Identity button
+          const createBtn = document.getElementById("createIdentityBtn");
+          if (createBtn) {
+            createBtn.addEventListener("click", () => {
+              this.openIdentityModal();
+            });
+          }
+
+          // Close modal buttons
+          document
+            .getElementById("closeIdentityModal")
+            ?.addEventListener("click", () => {
+              this.closeIdentityModal();
+            });
+          document
+            .getElementById("cancelIdentityModal")
+            ?.addEventListener("click", () => {
+              this.closeIdentityModal();
+            });
+
+          // Modal background click to close
+          document
+            .getElementById("identityModal")
+            ?.addEventListener("click", (e) => {
+              if (e.target.id === "identityModal") {
+                this.closeIdentityModal();
+              }
+            });
+
+          // Role type change handler
+          document
+            .getElementById("identityRoleType")
+            ?.addEventListener("change", (e) => {
+              const customGroup = document.getElementById("customRoleGroup");
+              if (e.target.value === "custom") {
+                customGroup.classList.remove("hidden");
+              } else {
+                customGroup.classList.add("hidden");
+              }
+            });
+
+          // Identity form submission
+          document
+            .getElementById("identityForm")
+            ?.addEventListener("submit", (e) => {
+              e.preventDefault();
+              this.handleIdentityFormSubmit();
+            });
+        }
+
+        setupPolicyModalEvents() {
+          // Create Policy button
+          const createBtn = document.getElementById("createPolicyBtn");
+          if (createBtn) {
+            createBtn.addEventListener("click", () => {
+              this.openPolicyModal();
+            });
+          }
+
+          // Close modal buttons
+          document
+            .getElementById("closePolicyModal")
+            ?.addEventListener("click", () => {
+              this.closePolicyModal();
+            });
+          document
+            .getElementById("cancelPolicyModal")
+            ?.addEventListener("click", () => {
+              this.closePolicyModal();
+            });
+
+          // Modal background click to close
+          document
+            .getElementById("policyModal")
+            ?.addEventListener("click", (e) => {
+              if (e.target.id === "policyModal") {
+                this.closePolicyModal();
+              }
+            });
+
+          // Template selection handler
+          document
+            .getElementById("policyTemplate")
+            ?.addEventListener("change", (e) => {
+              if (e.target.value) {
+                this.loadPolicyTemplate(e.target.value);
+              }
+            });
+
+          // Policy form submission
+          document
+            .getElementById("policyForm")
+            ?.addEventListener("submit", (e) => {
+              e.preventDefault();
+              this.handlePolicyFormSubmit();
+            });
+        }
+
+        // Identity Modal Methods
+        openIdentityModal(identityId = null) {
+          const modal = document.getElementById("identityModal");
+          const title = document.getElementById("identityModalTitle");
+          const form = document.getElementById("identityForm");
+
+          // Populate policy options
+          const policySelect = document.getElementById("identityPolicy");
+          policySelect.innerHTML =
+            '<option value="">No Policy (Custom permissions only)</option>' +
+            this.policies
+              .map(
+                (policy) =>
+                  `<option value="${policy.id}">${policy.name}</option>`
+              )
+              .join("");
+
+          if (identityId) {
+            // Edit mode
+            title.textContent = "Edit Identity";
+            const identity = this.identities.find((i) => i.id === identityId);
+            if (identity) {
+              document.getElementById("editingIdentityId").value = identityId;
+              document.getElementById("identityName").value = identity.name;
+              document.getElementById("identityRoleType").value =
+                identity.roleType;
+              document.getElementById("identityPolicy").value =
+                identity.assignedPolicies[0] || "";
+              document.getElementById("identityStatus").value = identity.status;
+
+              // Handle custom role
+              if (identity.roleType === "custom") {
+                document
+                  .getElementById("customRoleGroup")
+                  .classList.remove("hidden");
+                document.getElementById("customRoleName").value =
+                  identity.customRole || "";
+              }
+            }
+          } else {
+            // Create mode
+            title.textContent = "Create Identity";
+            form.reset();
+            document.getElementById("editingIdentityId").value = "";
+            document.getElementById("customRoleGroup").classList.add("hidden");
+          }
+
+          modal.classList.remove("hidden");
+          modal.classList.add("flex");
+        }
+
+        closeIdentityModal() {
+          const modal = document.getElementById("identityModal");
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+        }
+
+        handleIdentityFormSubmit() {
+          const editingId = document.getElementById("editingIdentityId").value;
+          const name = document.getElementById("identityName").value;
+          const roleType = document.getElementById("identityRoleType").value;
+          const customRole = document.getElementById("customRoleName").value;
+          const policyId = document.getElementById("identityPolicy").value;
+          const status = document.getElementById("identityStatus").value;
+
+          if (editingId) {
+            // Update existing identity
+            this.updateIdentity(editingId, {
+              name,
+              roleType,
+              customRole: roleType === "custom" ? customRole : undefined,
+              assignedPolicies: policyId ? [policyId] : [],
+              status,
+            });
+          } else {
+            // Create new identity
+            this.createIdentity({
+              name,
+              roleType,
+              customRole: roleType === "custom" ? customRole : undefined,
+              assignedPolicies: policyId ? [policyId] : [],
+              status,
+            });
+          }
+
+          this.closeIdentityModal();
+        }
+
+        // Policy Modal Methods
+        openPolicyModal(policyId = null) {
+          const modal = document.getElementById("policyModal");
+          const title = document.getElementById("policyModalTitle");
+          const form = document.getElementById("policyForm");
+
+          if (policyId) {
+            // Edit mode
+            title.textContent = "Edit Policy";
+            const policy = this.policies.find((p) => p.id === policyId);
+            if (policy) {
+              document.getElementById("editingPolicyId").value = policyId;
+              document.getElementById("policyName").value = policy.name;
+              document.getElementById("policyDescription").value =
+                policy.description;
+
+              // Set permission checkboxes
+              document
+                .querySelectorAll(".permission-checkbox")
+                .forEach((checkbox) => {
+                  const permission = checkbox.dataset.permission;
+                  checkbox.checked = policy.permissions[permission] === true;
+                });
+            }
+          } else {
+            // Create mode
+            title.textContent = "Create Policy";
+            form.reset();
+            document.getElementById("editingPolicyId").value = "";
+
+            // Uncheck all permissions
+            document
+              .querySelectorAll(".permission-checkbox")
+              .forEach((checkbox) => {
+                checkbox.checked = false;
+              });
+          }
+
+          modal.classList.remove("hidden");
+          modal.classList.add("flex");
+        }
+
+        closePolicyModal() {
+          const modal = document.getElementById("policyModal");
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+        }
+
+        loadPolicyTemplate(templateId) {
+          const template = this.policies.find((p) => p.id === templateId);
+          if (template) {
+            document
+              .querySelectorAll(".permission-checkbox")
+              .forEach((checkbox) => {
+                const permission = checkbox.dataset.permission;
+                checkbox.checked = template.permissions[permission] === true;
+              });
+          }
+        }
+
+        handlePolicyFormSubmit() {
+          const editingId = document.getElementById("editingPolicyId").value;
+          const name = document.getElementById("policyName").value;
+          const description =
+            document.getElementById("policyDescription").value;
+
+          // Collect permissions from checkboxes
+          const permissions = {};
+          document
+            .querySelectorAll(".permission-checkbox")
+            .forEach((checkbox) => {
+              const permission = checkbox.dataset.permission;
+              permissions[permission] = checkbox.checked;
+            });
+
+          if (editingId) {
+            // Update existing policy
+            this.updatePolicy(editingId, {
+              name,
+              description,
+              permissions,
+            });
+          } else {
+            // Create new policy
+            this.createPolicy({
+              name,
+              description,
+              permissions,
+            });
+          }
+
+          this.closePolicyModal();
+        }
+
+        setupPermissionMatrixEvents() {
+          // Add event delegation for permission toggles
+          document.addEventListener("click", (e) => {
+            if (e.target.classList.contains("permission-toggle")) {
+              const identityId = e.target.dataset.identity;
+              const tool = e.target.dataset.tool;
+              this.togglePermission(identityId, tool);
+            }
+          });
+        }
+
+        async togglePermission(identityId, tool) {
+          try {
+            const response = await fetch(
+              `/api/identities/${identityId}/toggle-permission`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ tool }),
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error("Failed to toggle permission");
+            }
+
+            // Reload data from server to stay in sync
+            await this.loadDataFromServer();
+
+            // Re-render the permissions matrix
+            this.renderPermissions();
+
+            // Update metrics and other tabs
+            this.updateMetrics();
+          } catch (error) {
+            console.error("Error toggling permission:", error);
+            alert("Failed to toggle permission. Please try again.");
+          }
+        }
+
+        setupAuditLogFilters() {
+          const filterIdentity = document.getElementById("filterIdentity");
+          const filterStatus = document.getElementById("filterStatus");
+
+          if (filterIdentity) {
+            filterIdentity.addEventListener("change", () => {
+              this.renderAuditLog();
+            });
+          }
+
+          if (filterStatus) {
+            filterStatus.addEventListener("change", () => {
+              this.renderAuditLog();
+            });
+          }
+        }
+
+        exportAuditLogToCsv() {
+          if (this.auditLogs.length === 0) {
+            alert("No audit logs to export");
+            return;
+          }
+
+          const headers = [
+            "Timestamp",
+            "Identity",
+            "Action",
+            "Status",
+            "Reason",
+            "Risk Level",
+          ];
+          const csvRows = [headers.join(",")];
+
+          this.auditLogs.forEach((log) => {
+            const identity = this.identities.find((i) => i.id === log.identity);
+            const identityName = identity ? identity.name : log.identity;
+
+            const row = [
+              new Date(log.timestamp).toISOString(),
+              `"${identityName}"`,
+              `"${log.action}"`,
+              log.allowed ? "Allowed" : "Blocked",
+              `"${log.reason}"`,
+              log.riskLevel,
+            ];
+            csvRows.push(row.join(","));
+          });
+
+          const csvContent = csvRows.join("\n");
+          const blob = new Blob([csvContent], { type: "text/csv" });
+          const url = window.URL.createObjectURL(blob);
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `mcp-gateway-audit-${
+            new Date().toISOString().split("T")[0]
+          }.csv`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        }
+
+        async resetAllPermissions() {
+          if (
+            confirm(
+              "Are you sure you want to reset all custom permissions? This will remove all manual overrides and revert to policy-based permissions only."
+            )
+          ) {
+            try {
+              const response = await fetch("/api/reset-permissions", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              });
+
+              if (!response.ok) {
+                throw new Error("Failed to reset permissions");
+              }
+
+              const result = await response.json();
+
+              await this.loadDataFromServer();
+              this.renderPermissions();
+              this.updateMetrics();
+
+              alert(result.message);
+            } catch (error) {
+              console.error("Error resetting permissions:", error);
+              alert("Failed to reset permissions. Please try again.");
+            }
+          }
+        }
+
+        savePermissions() {
+          // In a real application, this would save to backend
+          // For demo purposes, we'll just show a success message
+          const customPermissionCount = this.identities.reduce(
+            (count, identity) => {
+              return count + Object.keys(identity.customPermissions).length;
+            },
+            0
+          );
+
+          this.logAction(
+            "system",
+            "save-permissions",
+            true,
+            `Saved ${customPermissionCount} custom permission overrides`
+          );
+          alert(
+            `Permission matrix saved successfully! ${customPermissionCount} custom overrides are now persistent.`
+          );
+        }
+
+        // CRUD Operations - Now using backend APIs
+        async createIdentity(identityData) {
+          try {
+            const response = await fetch("/api/identities", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(identityData),
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to create identity");
+            }
+
+            await this.loadDataFromServer();
+            this.updateMetrics();
+            this.renderCurrentTab();
+          } catch (error) {
+            console.error("Error creating identity:", error);
+            alert("Failed to create identity. Please try again.");
+          }
+        }
+
+        async updateIdentity(identityId, updates) {
+          try {
+            const response = await fetch(`/api/identities/${identityId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(updates),
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to update identity");
+            }
+
+            await this.loadDataFromServer();
+            this.updateMetrics();
+            this.renderCurrentTab();
+          } catch (error) {
+            console.error("Error updating identity:", error);
+            alert("Failed to update identity. Please try again.");
+          }
+        }
+
+        async deleteIdentity(identityId) {
+          if (confirm("Are you sure you want to delete this identity?")) {
+            try {
+              const response = await fetch(`/api/identities/${identityId}`, {
+                method: "DELETE",
+              });
+
+              if (!response.ok) {
+                throw new Error("Failed to delete identity");
+              }
+
+              await this.loadDataFromServer();
+              this.updateMetrics();
+              this.renderCurrentTab();
+            } catch (error) {
+              console.error("Error deleting identity:", error);
+              alert("Failed to delete identity. Please try again.");
+            }
+          }
+        }
+
+        async createPolicy(policyData) {
+          try {
+            const response = await fetch("/api/policies", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(policyData),
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to create policy");
+            }
+
+            await this.loadDataFromServer();
+            this.updateMetrics();
+            this.renderCurrentTab();
+          } catch (error) {
+            console.error("Error creating policy:", error);
+            alert("Failed to create policy. Please try again.");
+          }
+        }
+
+        async updatePolicy(policyId, updates) {
+          try {
+            const response = await fetch(`/api/policies/${policyId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(updates),
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to update policy");
+            }
+
+            await this.loadDataFromServer();
+            this.updateMetrics();
+            this.renderCurrentTab();
+          } catch (error) {
+            console.error("Error updating policy:", error);
+            alert("Failed to update policy. Please try again.");
+          }
+        }
+
+        async deletePolicy(policyId) {
+          if (confirm("Are you sure you want to delete this policy?")) {
+            try {
+              const response = await fetch(`/api/policies/${policyId}`, {
+                method: "DELETE",
+              });
+
+              if (!response.ok) {
+                throw new Error("Failed to delete policy");
+              }
+
+              await this.loadDataFromServer();
+              this.updateMetrics();
+              this.renderCurrentTab();
+            } catch (error) {
+              console.error("Error deleting policy:", error);
+              alert("Failed to delete policy. Please try again.");
+            }
+          }
+        }
+
+        renderCurrentTab() {
+          switch (this.currentTab) {
+            case "dashboard":
+              this.renderDashboard();
+              break;
+            case "identities":
+              this.renderIdentities();
+              break;
+            case "permissions":
+              this.renderPermissions();
+              break;
+            case "policies":
+              this.renderPolicies();
+              break;
+          }
+        }
+
+        renderDashboard() {
+          // Populate identity selector
+          const select = document.getElementById("testIdentitySelect");
+          if (select) {
+            select.innerHTML =
+              '<option value="">Choose an identity...</option>' +
+              this.identities
+                .map(
+                  (identity) =>
+                    `<option value="${identity.id}">${identity.name} (${identity.roleType})</option>`
+                )
+                .join("");
+          }
+
+          // Populate filter dropdowns
+          const filterIdentitySelect =
+            document.getElementById("filterIdentity");
+          if (filterIdentitySelect) {
+            filterIdentitySelect.innerHTML =
+              '<option value="">All Identities</option>' +
+              this.identities
+                .map(
+                  (identity) =>
+                    `<option value="${identity.id}">${identity.name}</option>`
+                )
+                .join("");
+          }
+        }
+
+        renderIdentities() {
+          const tbody = document.getElementById("identitiesTableBody");
+          if (!tbody) return;
+
+          tbody.innerHTML = this.identities
+            .map(
+              (identity) => `
+          <tr class="hover:bg-impact-grey/50">
+            <td class="px-4 py-4 whitespace-nowrap">
+              <div class="font-medium text-langley-white">${identity.name}</div>
+              <div class="text-sm text-n2-grey">${identity.id}</div>
+            </td>
+            <td class="px-4 py-4 whitespace-nowrap">
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-eva-lime/20 text-eva-lime">
+                ${identity.roleType.toUpperCase()}
+              </span>
+            </td>
+            <td class="px-4 py-4 whitespace-nowrap">
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                identity.status === "active"
+                  ? "bg-green-500/20 text-green-300"
+                  : "bg-red-500/20 text-red-300"
+              }">
+                ${identity.status.toUpperCase()}
+              </span>
+            </td>
+            <td class="px-4 py-4 whitespace-nowrap text-sm text-langley-white">
+              ${identity.assignedPolicies.length} POLICIES
+            </td>
+            <td class="px-4 py-4 whitespace-nowrap text-sm text-langley-white">
+              ${identity.createdDate}
+            </td>
+            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+              <button class="text-eva-lime hover:text-eva-lime/80 mr-3 uppercase tracking-wide" onclick="app.openIdentityModal('${
+                identity.id
+              }')">EDIT</button>
+              <button class="text-longinus-red hover:text-longinus-red/80 uppercase tracking-wide" onclick="app.deleteIdentity('${
+                identity.id
+              }')">DELETE</button>
+            </td>
+          </tr>
+        `
+            )
+            .join("");
+        }
+
+        renderPermissions() {
+          const tbody = document.getElementById("permissionsMatrixBody");
+          if (!tbody) return;
+
+          const tools = [
+            "slack.send-message",
+            "slack.create-channel",
+            "salesforce.create-lead",
+            "salesforce.update-contact",
+            "github.create-issue",
+            "github.create-pr",
+            "jira.create-ticket",
+            "jira.update-status",
+          ];
+
+          tbody.innerHTML = this.identities
+            .map((identity) => {
+              const permissions = this.getEffectivePermissions(identity.id);
+              return `
+            <tr>
+              <td class="border border-n2-grey px-4 py-3 font-medium bg-impact-grey text-langley-white">${
+                identity.name
+              }</td>
+              ${tools
+                .map((tool) => {
+                  const isAllowed = permissions[tool];
+                  const isCustomOverride =
+                    identity.customPermissions.hasOwnProperty(tool);
+                  const policyPermission = this.getPolicyPermission(
+                    identity.id,
+                    tool
+                  );
+                  const hasPolicy = identity.assignedPolicies.length > 0;
+
+                  let bgColor = "bg-red-500";
+                  let title = "Denied";
+
+                  if (isAllowed) {
+                    if (isCustomOverride) {
+                      bgColor = "bg-purple-600"; // Custom override allowed
+                      title = hasPolicy
+                        ? "Allowed (Custom Override)"
+                        : "Allowed (Custom)";
+                    } else if (hasPolicy) {
+                      bgColor = "bg-green-500"; // Policy allowed
+                      title = "Allowed (Policy)";
+                    } else {
+                      // This shouldn't happen if logic is correct, but fallback
+                      bgColor = "bg-gray-400";
+                      title = "No Policy Assigned";
+                    }
+                  } else {
+                    if (isCustomOverride) {
+                      bgColor = "bg-purple-600"; // Custom denied
+                      title = hasPolicy
+                        ? "Denied (Custom Override)"
+                        : "Denied (Custom)";
+                    } else if (hasPolicy) {
+                      bgColor = "bg-red-500"; // Policy denied
+                      title = "Denied (Policy)";
+                    } else {
+                      bgColor = "bg-gray-500"; // No policy, default denied
+                      title = "Denied (No Policy)";
+                    }
+                  }
+
+                  return `
+                  <td class="border border-n2-grey px-2 py-3 text-center">
+                    <button class="permission-toggle w-6 h-6 rounded ${bgColor} transition-all duration-200 hover:opacity-80 hover:scale-110 cursor-pointer" 
+                    data-identity="${identity.id}" 
+                    data-tool="${tool}"
+                    title="${title}">
+                    </button>
+                  </td>
                 `;
-          resultDiv.innerHTML = errorEntry + resultDiv.innerHTML;
+                })
+                .join("")}
+            </tr>
+          `;
+            })
+            .join("");
+        }
+
+        renderPolicies() {
+          const grid = document.getElementById("policiesGrid");
+          if (!grid) return;
+
+          grid.innerHTML = this.policies
+            .map(
+              (policy) => `
+          <div class="bg-impact-grey border border-n2-grey rounded-lg p-6 hover:border-eva-lime transition-all">
+            <h3 class="text-lg font-semibold text-eva-lime mb-2 uppercase tracking-wide">${
+              policy.name
+            }</h3>
+            <p class="text-langley-white text-sm mb-4">${policy.description}</p>
+            <div class="space-y-2">
+              ${Object.entries(policy.permissions)
+                .map(
+                  ([tool, allowed]) => `
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-langley-white">${tool}</span>
+                  <span class="px-2 py-1 rounded text-xs ${
+                    allowed
+                      ? "bg-green-500/20 text-green-300"
+                      : "bg-red-500/20 text-red-300"
+                  }">
+                    ${allowed ? "Allowed" : "Denied"}
+                  </span>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+            <div class="mt-4 flex space-x-2">
+              <button class="text-eva-lime hover:text-eva-lime/80 text-sm font-medium uppercase tracking-wide" onclick="app.openPolicyModal('${
+                policy.id
+              }')">EDIT</button>
+              <button class="text-longinus-red hover:text-longinus-red/80 text-sm font-medium uppercase tracking-wide" onclick="app.deletePolicy('${
+                policy.id
+              }')">DELETE</button>
+            </div>
+          </div>
+        `
+            )
+            .join("");
+        }
+
+        getEffectivePermissions(identityId) {
+          const identity = this.identities.find((i) => i.id === identityId);
+          if (!identity) return {};
+
+          let permissions = {};
+
+          // Apply policy permissions
+          identity.assignedPolicies.forEach((policyId) => {
+            const policy = this.policies.find((p) => p.id === policyId);
+            if (policy) {
+              Object.assign(permissions, policy.permissions);
+            }
+          });
+
+          // Apply custom overrides
+          Object.assign(permissions, identity.customPermissions);
+
+          return permissions;
+        }
+
+        getPolicyPermission(identityId, tool) {
+          const identity = this.identities.find((i) => i.id === identityId);
+          if (!identity) return false;
+
+          // Check policies only (ignore custom overrides)
+          for (let policyId of identity.assignedPolicies) {
+            const policy = this.policies.find((p) => p.id === policyId);
+            if (policy && policy.permissions.hasOwnProperty(tool)) {
+              return policy.permissions[tool];
+            }
+          }
+          return false;
+        }
+
+        handleIdentitySelection(identityId) {
+          if (!identityId) {
+            document
+              .getElementById("currentPermissions")
+              .classList.add("hidden");
+            document.getElementById("testActionsGrid").innerHTML = "";
+            return;
+          }
+
+          const identity = this.identities.find((i) => i.id === identityId);
+          const permissions = this.getEffectivePermissions(identityId);
+
+          // Show current permissions
+          const permissionsDiv = document.getElementById("currentPermissions");
+          const permissionsList = document.getElementById("permissionsList");
+
+          permissionsList.innerHTML = Object.entries(permissions)
+            .map(([tool, allowed]) => {
+              const isCustomOverride =
+                identity.customPermissions.hasOwnProperty(tool);
+              let badgeClass, statusText;
+
+              if (isCustomOverride) {
+                badgeClass = "bg-purple-600/20 text-purple-300";
+                statusText = allowed ? "ALLOW (CUSTOM)" : "DENY (CUSTOM)";
+              } else {
+                badgeClass = allowed
+                  ? "bg-green-500/20 text-green-300"
+                  : "bg-red-500/20 text-red-300";
+                statusText = allowed ? "ALLOW" : "DENY";
+              }
+
+              return `<div class="flex justify-between items-center">
+            <span class="text-langley-white">${tool}</span>
+            <span class="px-2 py-1 rounded text-xs ${badgeClass}">
+              ${statusText}
+            </span>
+          </div>`;
+            })
+            .join("");
+
+          permissionsDiv.classList.remove("hidden");
+
+          // Render test action buttons
+          this.renderTestActions(identityId, permissions);
+        }
+
+        renderTestActions(identityId, permissions) {
+          const grid = document.getElementById("testActionsGrid");
+          const identity = this.identities.find((i) => i.id === identityId);
+
+          grid.innerHTML = Object.entries(permissions)
+            .map(([tool, allowed]) => {
+              const isCustomOverride =
+                identity.customPermissions.hasOwnProperty(tool);
+              let indicatorColor;
+
+              if (isCustomOverride) {
+                indicatorColor = "bg-purple-600";
+              } else {
+                indicatorColor = allowed ? "bg-green-500" : "bg-red-500";
+              }
+
+              return `
+          <button class="px-3 py-2 text-sm font-semibold rounded-lg border bg-impact-grey border-n2-grey text-langley-white hover:bg-impact-grey/80 transition-all uppercase tracking-wide flex items-center justify-between" onclick="app.testAction('${identityId}', '${tool}')">
+            <span>${tool.replace(/\./g, " ").replace(/-/g, " ")}</span>
+            <div class="w-2 h-2 rounded-full ${indicatorColor}"></div>
+          </button>
+        `;
+            })
+            .join("");
+        }
+
+        testAction(identityId, action) {
+          const identity = this.identities.find((i) => i.id === identityId);
+          if (!identity || identity.status !== "active") {
+            this.logAction(
+              identityId,
+              action,
+              false,
+              "Identity inactive or not found",
+              true
+            );
+            return false;
+          }
+
+          const permissions = this.getEffectivePermissions(identityId);
+          const allowed = permissions[action] === true;
+          const reason = this.getPermissionReason(identityId, action);
+
+          this.logAction(identityId, action, allowed, reason, true);
+          return allowed;
+        }
+
+        getPermissionReason(identityId, action) {
+          const identity = this.identities.find((i) => i.id === identityId);
+
+          // Check custom permissions first
+          if (identity.customPermissions.hasOwnProperty(action)) {
+            return "Custom permission override";
+          }
+
+          // Check policies
+          for (let policyId of identity.assignedPolicies) {
+            const policy = this.policies.find((p) => p.id === policyId);
+            if (policy && policy.permissions.hasOwnProperty(action)) {
+              return `${policy.name} policy → ${action}`;
+            }
+          }
+
+          return `${identity.roleType} role → ${action}`;
+        }
+
+        logAction(identityId, action, allowed, reason, isTestAction = false) {
+          const logEntry = {
+            id: `log-${Date.now()}`,
+            timestamp: new Date().toISOString(),
+            identity: identityId,
+            action: action,
+            allowed: allowed,
+            reason: reason,
+            riskLevel: allowed ? "low" : "medium",
+            isTestAction: isTestAction,
+          };
+
+          this.auditLogs.unshift(logEntry);
+          this.renderAuditLog();
+          this.updateMetrics();
+        }
+
+        renderAuditLog() {
+          const container = document.getElementById("auditLogContainer");
+          if (!container) return;
+
+          // Get filter values
+          const filterIdentity =
+            document.getElementById("filterIdentity")?.value || "";
+          const filterStatus =
+            document.getElementById("filterStatus")?.value || "";
+
+          // Apply filters
+          let filteredLogs = this.auditLogs;
+
+          if (filterIdentity) {
+            filteredLogs = filteredLogs.filter(
+              (log) => log.identity === filterIdentity
+            );
+          }
+
+          if (filterStatus) {
+            if (filterStatus === "allowed") {
+              filteredLogs = filteredLogs.filter((log) => log.allowed === true);
+            } else if (filterStatus === "blocked") {
+              filteredLogs = filteredLogs.filter(
+                (log) => log.allowed === false
+              );
+            }
+          }
+
+          if (filteredLogs.length === 0) {
+            container.innerHTML =
+              '<div class="text-center text-langley-white py-8 uppercase tracking-wide">NO AUDIT LOGS MATCH THE CURRENT FILTERS...</div>';
+            return;
+          }
+
+          container.innerHTML = filteredLogs
+            .slice(0, 50)
+            .map((log) => {
+              const time = new Date(log.timestamp).toLocaleTimeString();
+              const identity = this.identities.find(
+                (i) => i.id === log.identity
+              );
+              const identityName = identity ? identity.name : log.identity;
+
+              return `
+            <div class="mb-2 p-3 rounded border-l-4 ${
+              log.allowed
+                ? "border-n2-grey bg-eva-lime/10 text-eva-lime"
+                : "border-longinus-red bg-longinus-red/10 text-longinus-red"
+            } font-mono">
+              <div class="text-xs opacity-75 uppercase tracking-wider">[${time}]</div>
+              <div class="font-bold uppercase tracking-wide">${identityName} → ${
+                log.action
+              }</div>
+              <div class="text-xs opacity-90 mt-1">${log.reason}</div>
+            </div>
+          `;
+            })
+            .join("");
+        }
+
+        clearAuditLog() {
+          this.auditLogs = [];
+          this.renderAuditLog();
+          this.updateMetrics();
+        }
+
+        updateMetrics() {
+          // Filter only test actions for header metrics
+          const testActionLogs = this.auditLogs.filter(
+            (log) => log.isTestAction
+          );
+
+          // Update header metrics
+          const totalIdentities = document.getElementById("totalIdentities");
+          const activePolicies = document.getElementById("activePolicies");
+          const successRate = document.getElementById("successRate");
+          const recentActions = document.getElementById("recentActions");
+
+          if (totalIdentities)
+            totalIdentities.textContent = this.identities.length;
+          if (activePolicies) activePolicies.textContent = this.policies.length;
+          if (recentActions) recentActions.textContent = testActionLogs.length;
+
+          // Calculate success rate based only on test actions
+          if (successRate) {
+            if (testActionLogs.length > 0) {
+              const allowedTestActions = testActionLogs.filter(
+                (log) => log.allowed
+              ).length;
+              const rate = Math.round(
+                (allowedTestActions / testActionLogs.length) * 100
+              );
+              successRate.textContent = `${rate}%`;
+            } else {
+              successRate.textContent = "0%";
+            }
+          }
+
+          // Update identities tab counters
+          const totalIdentitiesCount = document.getElementById(
+            "totalIdentitiesCount"
+          );
+          const activeIdentitiesCount = document.getElementById(
+            "activeIdentitiesCount"
+          );
+
+          if (totalIdentitiesCount)
+            totalIdentitiesCount.textContent = this.identities.length;
+          if (activeIdentitiesCount) {
+            const activeCount = this.identities.filter(
+              (i) => i.status === "active"
+            ).length;
+            activeIdentitiesCount.textContent = activeCount;
+          }
         }
       }
 
-      function clearResults() {
-        document.getElementById("results").innerHTML = `
-                <div style="opacity: 0.7; text-align: center; padding: 20px;">
-                    Audit log cleared. Select actions to test...
-                </div>
-            `;
-      }
-
-      // Initialize when page loads
-      init();
-
-      // Check if we're in an iframe and show notice
-      if (window.self !== window.top) {
-        document.getElementById("iframeNotice").classList.add("show");
-      }
-
-      function openInNewTab() {
-        window.open(window.location.href, "_blank");
-      }
+      // Initialize the app
+      const app = new MCPGatewayApp();
     </script>
   </body>
 </html>
