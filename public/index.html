@@ -100,25 +100,32 @@
       }
     </style>
   </head>
-  <body class="bg-impact-grey min-h-screen max-h-screen font-nk57 flex flex-col">
-    <div class="container mx-auto px-2 py-3 flex-1 flex flex-col max-h-screen overflow-hidden">
+  <body
+    class="bg-impact-grey min-h-screen max-h-screen font-nk57 flex flex-col"
+    style="min-height: 60rem"
+  >
+    <div
+      class="container mx-auto px-2 py-3 flex-1 flex flex-col max-h-screen overflow-hidden"
+    >
       <!-- Header -->
       <header
         class="bg-impact-grey border border-n2-grey rounded-xl shadow-2xl mb-8 animate-fade-in"
       >
         <div class="px-4 py-4">
           <h1
-            class="text-4xl font-bold text-eva-lime text-center mb-2 tracking-wide"
+            class="text-2xl sm:text-3xl lg:text-4xl font-bold text-eva-lime text-center mb-2 tracking-wide"
           >
             MCP GATEWAY AUTH CONTROL
           </h1>
 
-          <div class="flex justify-center space-x-8 mt-6">
+          <div
+            class="grid grid-cols-2 sm:flex sm:justify-center gap-4 sm:gap-8 mt-6"
+          >
             <div
               class="text-center p-3 bg-impact-grey border border-n2-grey rounded-lg"
             >
               <span
-                class="block text-2xl font-bold text-eva-lime"
+                class="block text-xl sm:text-2xl font-bold text-eva-lime"
                 id="totalIdentities"
                 >4</span
               >
@@ -130,7 +137,7 @@
               class="text-center p-3 bg-impact-grey border border-n2-grey rounded-lg"
             >
               <span
-                class="block text-2xl font-bold text-eva-lime"
+                class="block text-xl sm:text-2xl font-bold text-eva-lime"
                 id="activePolicies"
                 >6</span
               >
@@ -142,7 +149,7 @@
               class="text-center p-3 bg-impact-grey border border-n2-grey rounded-lg"
             >
               <span
-                class="block text-2xl font-bold text-eva-lime"
+                class="block text-xl sm:text-2xl font-bold text-eva-lime"
                 id="successRate"
                 >89%</span
               >
@@ -154,7 +161,7 @@
               class="text-center p-3 bg-impact-grey border border-n2-grey rounded-lg"
             >
               <span
-                class="block text-2xl font-bold text-eva-lime"
+                class="block text-xl sm:text-2xl font-bold text-eva-lime"
                 id="recentActions"
                 >12</span
               >
@@ -172,28 +179,32 @@
       >
         <div class="flex border-b border-n2-grey">
           <button
-            class="tab-btn flex-1 px-6 py-4 text-center font-medium text-langley-white border-b-2 border-transparent hover:text-eva-lime hover:border-eva-lime transition-all duration-200 active uppercase tracking-wide"
+            class="tab-btn flex-1 px-3 sm:px-6 py-3 sm:py-4 text-center font-medium text-langley-white border-b-2 border-transparent hover:text-eva-lime hover:border-eva-lime transition-all duration-200 active uppercase tracking-wide text-xs sm:text-base"
             data-tab="dashboard"
           >
-            DASHBOARD
+            <span class="hidden sm:inline">DASHBOARD</span>
+            <span class="sm:hidden">DASH</span>
           </button>
           <button
-            class="tab-btn flex-1 px-6 py-4 text-center font-medium text-langley-white border-b-2 border-transparent hover:text-eva-lime hover:border-eva-lime transition-all duration-200 uppercase tracking-wide"
+            class="tab-btn flex-1 px-3 sm:px-6 py-3 sm:py-4 text-center font-medium text-langley-white border-b-2 border-transparent hover:text-eva-lime hover:border-eva-lime transition-all duration-200 uppercase tracking-wide text-xs sm:text-base"
             data-tab="identities"
           >
-            IDENTITIES
+            <span class="hidden sm:inline">IDENTITIES</span>
+            <span class="sm:hidden">IDs</span>
           </button>
           <button
-            class="tab-btn flex-1 px-6 py-4 text-center font-medium text-langley-white border-b-2 border-transparent hover:text-eva-lime hover:border-eva-lime transition-all duration-200 uppercase tracking-wide"
+            class="tab-btn flex-1 px-3 sm:px-6 py-3 sm:py-4 text-center font-medium text-langley-white border-b-2 border-transparent hover:text-eva-lime hover:border-eva-lime transition-all duration-200 uppercase tracking-wide text-xs sm:text-base"
             data-tab="permissions"
           >
-            PERMISSIONS
+            <span class="hidden sm:inline">PERMISSIONS</span>
+            <span class="sm:hidden">PERMS</span>
           </button>
           <button
-            class="tab-btn flex-1 px-6 py-4 text-center font-medium text-langley-white border-b-2 border-transparent hover:text-eva-lime hover:border-eva-lime transition-all duration-200 uppercase tracking-wide"
+            class="tab-btn flex-1 px-3 sm:px-6 py-3 sm:py-4 text-center font-medium text-langley-white border-b-2 border-transparent hover:text-eva-lime hover:border-eva-lime transition-all duration-200 uppercase tracking-wide text-xs sm:text-base"
             data-tab="policies"
           >
-            POLICIES
+            <span class="hidden sm:inline">POLICIES</span>
+            <span class="sm:hidden">POL</span>
           </button>
         </div>
       </nav>
@@ -202,86 +213,86 @@
       <main class="tab-content flex-1 flex flex-col overflow-hidden min-h-0">
         <!-- Dashboard Tab -->
         <div class="tab-panel flex-1 flex flex-col min-h-0" id="dashboard">
-          <div class="grid grid-cols-1 lg:grid-cols-2 flex-1 min-h-0">
+          <div
+            class="grid grid-cols-1 xl:grid-cols-2 flex-1 min-h-0 gap-0 xl:gap-0"
+          >
             <!-- Test Actions Section -->
             <div
-              class="bg-impact-grey border border-n2-grey border-t-0 rounded-bl-xl shadow-2xl p-4"
+              class="bg-impact-grey border border-n2-grey border-t-0 xl:rounded-bl-xl shadow-2xl p-3 sm:p-4 flex flex-col min-h-0"
             >
               <h3
-                class="text-xl font-semibold text-eva-lime mb-4 flex items-center uppercase tracking-wide"
+                class="text-lg sm:text-xl font-semibold text-eva-lime mb-3 sm:mb-4 flex items-center uppercase tracking-wide"
               >
                 <span>TEST ACTIONS</span>
               </h3>
 
-              <div class="mb-4">
+              <div class="mb-3 sm:mb-4">
                 <label
-                  class="block text-sm font-medium text-langley-white mb-2 uppercase tracking-wide"
+                  class="block text-xs sm:text-sm font-medium text-langley-white mb-2 uppercase tracking-wide"
                   >SELECT IDENTITY:</label
                 >
                 <select
                   id="testIdentitySelect"
-                  class="w-full px-3 py-2 bg-impact-grey border border-n2-grey text-langley-white rounded-lg focus:ring-2 focus:ring-eva-lime focus:border-eva-lime"
+                  class="w-full px-2 sm:px-3 py-2 text-sm bg-impact-grey border border-n2-grey text-langley-white rounded-lg focus:ring-2 focus:ring-eva-lime focus:border-eva-lime"
                 >
                   <option value="">CHOOSE AN IDENTITY...</option>
                 </select>
               </div>
 
               <div
-                id="currentPermissions"
-                class="mb-4 p-4 bg-impact-grey border border-n2-grey rounded-lg hidden"
+                class="flex-1 overflow-y-auto min-h-[400px] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-n2-grey [&::-webkit-scrollbar-thumb]:bg-n2-grey"
               >
-                <h4
-                  class="font-medium text-eva-lime mb-2 uppercase tracking-wide"
-                >
-                  CURRENT PERMISSIONS:
-                </h4>
                 <div
-                  id="permissionsList"
-                  class="space-y-1 text-sm text-langley-white"
-                ></div>
-              </div>
-
-              <div id="testActionsGrid" class="grid grid-cols-2 gap-3">
-                <!-- Action buttons will be populated here -->
+                  id="testActionsGrid"
+                  class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 min-h-[200px]"
+                >
+                  <!-- Action buttons will be populated here -->
+                </div>
               </div>
             </div>
 
             <!-- Live Audit Log Section -->
             <div
-              class="bg-impact-grey border border-n2-grey border-t-0 rounded-br-xl shadow-2xl p-4 flex flex-col min-h-0"
+              class="bg-impact-grey border border-n2-grey border-t-0 xl:rounded-br-xl shadow-2xl p-3 sm:p-4 flex flex-col min-h-0"
             >
-              <div class="flex justify-between items-center mb-4">
+              <div
+                class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 sm:mb-4 gap-2 sm:gap-0"
+              >
                 <h3
-                  class="text-xl font-semibold text-eva-lime flex items-center uppercase tracking-wide"
+                  class="text-lg sm:text-xl font-semibold text-eva-lime flex items-center uppercase tracking-wide"
                 >
                   <span>LIVE AUDIT LOG</span>
                 </h3>
                 <div class="flex space-x-2">
                   <button
                     id="clearLogBtn"
-                    class="px-3 py-2 text-sm bg-longinus-red border border-longinus-red text-white rounded-md hover:bg-longinus-red/90 transition-colors font-semibold uppercase"
+                    class="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm bg-longinus-red border border-longinus-red text-white rounded-md hover:bg-longinus-red/90 transition-colors font-semibold uppercase"
                   >
-                    CLEAR LOG
+                    <span class="hidden sm:inline">CLEAR LOG</span>
+                    <span class="sm:hidden">CLEAR</span>
                   </button>
                   <button
                     id="exportCsvBtn"
-                    class="px-3 py-2 text-sm bg-eva-lime border border-eva-lime text-black rounded-md hover:bg-eva-lime/90 transition-colors font-semibold uppercase"
+                    class="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm bg-eva-lime border border-eva-lime text-black rounded-md hover:bg-eva-lime/90 transition-colors font-semibold uppercase"
                   >
-                    EXPORT CSV
+                    <span class="hidden sm:inline">EXPORT CSV</span>
+                    <span class="sm:hidden">CSV</span>
                   </button>
                 </div>
               </div>
 
-              <div class="flex space-x-2 mb-4">
+              <div
+                class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mb-3 sm:mb-4"
+              >
                 <select
                   id="filterIdentity"
-                  class="flex-1 px-2 py-1 text-sm bg-impact-grey border border-n2-grey text-langley-white rounded-md focus:ring-1 focus:ring-eva-lime focus:border-eva-lime"
+                  class="flex-1 px-2 py-1 text-xs sm:text-sm bg-impact-grey border border-n2-grey text-langley-white rounded-md focus:ring-1 focus:ring-eva-lime focus:border-eva-lime"
                 >
                   <option value="">ALL IDENTITIES</option>
                 </select>
                 <select
                   id="filterStatus"
-                  class="flex-1 px-2 py-1 text-sm bg-impact-grey border border-n2-grey text-langley-white rounded-md focus:ring-1 focus:ring-eva-lime focus:border-eva-lime"
+                  class="flex-1 px-2 py-1 text-xs sm:text-sm bg-impact-grey border border-n2-grey text-langley-white rounded-md focus:ring-1 focus:ring-eva-lime focus:border-eva-lime"
                 >
                   <option value="">ALL STATUS</option>
                   <option value="allowed">ALLOWED</option>
@@ -291,10 +302,10 @@
 
               <div
                 id="auditLogContainer"
-                class="bg-[#161616] border border-n2-grey text-eva-lime rounded-lg p-4 flex-1 overflow-y-auto font-mono text-sm [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-n2-grey [&::-webkit-scrollbar-thumb]:bg-n2-grey dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+                class="bg-[#161616] border border-n2-grey text-eva-lime rounded-lg p-2 sm:p-4 flex-1 overflow-y-auto font-mono text-xs sm:text-sm min-h-[200px] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-n2-grey [&::-webkit-scrollbar-thumb]:bg-n2-grey dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
               >
                 <div
-                  class="text-center text-langley-white py-8 uppercase tracking-wide"
+                  class="text-center text-langley-white py-4 sm:py-8 uppercase tracking-wide text-xs sm:text-sm"
                 >
                   SELECT AN IDENTITY AND TEST ACTIONS TO SEE AUDIT LOGS...
                 </div>
@@ -304,7 +315,10 @@
         </div>
 
         <!-- Identities Tab -->
-        <div class="tab-panel hidden flex-1 flex flex-col min-h-0" id="identities">
+        <div
+          class="tab-panel hidden flex-1 flex flex-col min-h-0"
+          id="identities"
+        >
           <div
             class="bg-impact-grey border border-n2-grey border-t-0 rounded-b-xl shadow-2xl p-4 flex-1 overflow-y-auto min-h-0 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-n2-grey [&::-webkit-scrollbar-thumb]:bg-n2-grey dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
           >
@@ -323,11 +337,13 @@
             </div>
 
             <div
-              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
+              class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6"
             >
-              <div class="bg-impact-grey border border-n2-grey p-4 rounded-lg">
+              <div
+                class="bg-impact-grey border border-n2-grey p-3 sm:p-4 rounded-lg"
+              >
                 <div
-                  class="text-2xl font-bold text-eva-lime"
+                  class="text-xl sm:text-2xl font-bold text-eva-lime"
                   id="totalIdentitiesCount"
                 >
                   4
@@ -338,9 +354,11 @@
                   TOTAL IDENTITIES
                 </div>
               </div>
-              <div class="bg-impact-grey border border-n2-grey p-4 rounded-lg">
+              <div
+                class="bg-impact-grey border border-n2-grey p-3 sm:p-4 rounded-lg"
+              >
                 <div
-                  class="text-2xl font-bold text-eva-lime"
+                  class="text-xl sm:text-2xl font-bold text-eva-lime"
                   id="activeIdentitiesCount"
                 >
                   4
@@ -354,36 +372,36 @@
             </div>
 
             <div class="overflow-x-auto">
-              <table class="w-full table-auto">
+              <table class="w-full table-auto min-w-[600px]">
                 <thead class="bg-impact-grey">
                   <tr>
                     <th
-                      class="px-4 py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
+                      class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
                     >
                       Identity
                     </th>
                     <th
-                      class="px-4 py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
+                      class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
                     >
                       Role Type
                     </th>
                     <th
-                      class="px-4 py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
+                      class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
                     >
                       Status
                     </th>
                     <th
-                      class="px-4 py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
+                      class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider hidden sm:table-cell"
                     >
                       Policies
                     </th>
                     <th
-                      class="px-4 py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
+                      class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider hidden md:table-cell"
                     >
                       Created
                     </th>
                     <th
-                      class="px-4 py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
+                      class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-eva-lime uppercase tracking-wider"
                     >
                       Actions
                     </th>
@@ -401,7 +419,10 @@
         </div>
 
         <!-- Permissions Tab -->
-        <div class="tab-panel hidden flex-1 flex flex-col min-h-0" id="permissions">
+        <div
+          class="tab-panel hidden flex-1 flex flex-col min-h-0"
+          id="permissions"
+        >
           <div
             class="bg-impact-grey border border-n2-grey border-t-0 rounded-b-xl shadow-2xl p-4 flex-1 overflow-y-auto min-h-0 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-n2-grey [&::-webkit-scrollbar-thumb]:bg-n2-grey dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
           >
@@ -535,7 +556,10 @@
         </div>
 
         <!-- Policies Tab -->
-        <div class="tab-panel hidden flex-1 flex flex-col min-h-0" id="policies">
+        <div
+          class="tab-panel hidden flex-1 flex flex-col min-h-0"
+          id="policies"
+        >
           <div
             class="bg-impact-grey border border-n2-grey border-t-0 rounded-b-xl shadow-2xl p-4 flex-1 overflow-y-auto min-h-0 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-n2-grey [&::-webkit-scrollbar-thumb]:bg-n2-grey dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
           >
@@ -555,7 +579,7 @@
 
             <div
               id="policiesGrid"
-              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
             >
               <!-- Policy cards will be populated here -->
             </div>
@@ -570,12 +594,12 @@
       class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50"
     >
       <div
-        class="bg-impact-grey border border-n2-grey rounded-xl shadow-2xl max-w-md w-full mx-4 max-h-screen overflow-y-auto"
+        class="bg-impact-grey border border-n2-grey rounded-xl shadow-2xl max-w-md w-full mx-2 sm:mx-4 max-h-screen overflow-y-auto"
       >
-        <div class="px-6 py-4 border-b border-n2-grey">
+        <div class="px-4 sm:px-6 py-4 border-b border-n2-grey relative">
           <h3
             id="identityModalTitle"
-            class="text-lg font-semibold text-eva-lime uppercase tracking-wide"
+            class="text-base sm:text-lg font-semibold text-eva-lime uppercase tracking-wide"
           >
             CREATE IDENTITY
           </h3>
@@ -599,7 +623,7 @@
           </button>
         </div>
 
-        <form id="identityForm" class="px-6 py-4 space-y-4">
+        <form id="identityForm" class="px-4 sm:px-6 py-4 space-y-4">
           <input type="hidden" id="editingIdentityId" value="" />
 
           <div class="form-group">
@@ -701,12 +725,12 @@
       class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50"
     >
       <div
-        class="bg-impact-grey border border-n2-grey rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto"
+        class="bg-impact-grey border border-n2-grey rounded-xl shadow-2xl max-w-2xl w-full mx-2 sm:mx-4 max-h-screen overflow-y-auto"
       >
-        <div class="px-6 py-4 border-b border-n2-grey">
+        <div class="px-4 sm:px-6 py-4 border-b border-n2-grey relative">
           <h3
             id="policyModalTitle"
-            class="text-lg font-semibold text-eva-lime uppercase tracking-wide"
+            class="text-base sm:text-lg font-semibold text-eva-lime uppercase tracking-wide"
           >
             CREATE POLICY
           </h3>
@@ -730,7 +754,7 @@
           </button>
         </div>
 
-        <form id="policyForm" class="px-6 py-4 space-y-4">
+        <form id="policyForm" class="px-4 sm:px-6 py-4 space-y-4">
           <input type="hidden" id="editingPolicyId" value="" />
 
           <div class="form-group">
@@ -941,32 +965,51 @@
         }
 
         async init() {
+          console.log("Initializing MCP Gateway App...");
           this.setupEventListeners();
           await this.loadDataFromServer();
           this.renderDashboard();
           this.renderCurrentTab(); // Make sure current tab is rendered with data
           this.updateMetrics();
+          console.log("App initialization complete");
         }
 
         // Load data from server APIs
         async loadDataFromServer() {
           try {
+            console.log("Loading data from server...");
+            
             // Load identities
             const identitiesResponse = await fetch("/api/identities");
+            if (!identitiesResponse.ok) {
+              throw new Error(`Failed to load identities: ${identitiesResponse.status}`);
+            }
             this.identities = await identitiesResponse.json();
-            console.log("Loaded identities:", this.identities);
+            console.log("Loaded identities:", this.identities.length, "items");
 
             // Load policies
             const policiesResponse = await fetch("/api/policies");
+            if (!policiesResponse.ok) {
+              throw new Error(`Failed to load policies: ${policiesResponse.status}`);
+            }
             this.policies = await policiesResponse.json();
-            console.log("Loaded policies:", this.policies);
+            console.log("Loaded policies:", this.policies.length, "items");
 
             // Load audit logs
             const logsResponse = await fetch("/api/logs");
+            if (!logsResponse.ok) {
+              throw new Error(`Failed to load logs: ${logsResponse.status}`);
+            }
             this.auditLogs = await logsResponse.json();
-            console.log("Loaded audit logs:", this.auditLogs);
+            console.log("Loaded audit logs:", this.auditLogs.length, "items");
+            
+            console.log("All data loaded successfully");
           } catch (error) {
             console.error("Error loading data from server:", error);
+            // Set fallback empty data to prevent crashes
+            this.identities = this.identities || [];
+            this.policies = this.policies || [];
+            this.auditLogs = this.auditLogs || [];
           }
         }
 
@@ -974,7 +1017,7 @@
           // Tab navigation
           document.querySelectorAll(".tab-btn").forEach((btn) => {
             btn.addEventListener("click", (e) => {
-              const tabName = e.target.dataset.tab;
+              const tabName = e.currentTarget.dataset.tab;
               this.switchTab(tabName);
             });
           });
@@ -1032,6 +1075,8 @@
         }
 
         switchTab(tabName) {
+          console.log(`Switching to tab: ${tabName}`);
+          
           // Update active tab button
           document.querySelectorAll(".tab-btn").forEach((btn) => {
             if (btn.dataset.tab === tabName) {
@@ -1631,6 +1676,9 @@
         }
 
         renderCurrentTab() {
+          console.log(`Rendering tab: ${this.currentTab}`);
+          console.log(`Available data - Identities: ${this.identities?.length || 0}, Policies: ${this.policies?.length || 0}`);
+          
           switch (this.currentTab) {
             case "dashboard":
               this.renderDashboard();
@@ -1885,46 +1933,12 @@
 
         handleIdentitySelection(identityId) {
           if (!identityId) {
-            document
-              .getElementById("currentPermissions")
-              .classList.add("hidden");
             document.getElementById("testActionsGrid").innerHTML = "";
             return;
           }
 
           const identity = this.identities.find((i) => i.id === identityId);
           const permissions = this.getEffectivePermissions(identityId);
-
-          // Show current permissions
-          const permissionsDiv = document.getElementById("currentPermissions");
-          const permissionsList = document.getElementById("permissionsList");
-
-          permissionsList.innerHTML = Object.entries(permissions)
-            .map(([tool, allowed]) => {
-              const isCustomOverride =
-                identity.customPermissions.hasOwnProperty(tool);
-              let badgeClass, statusText;
-
-              if (isCustomOverride) {
-                badgeClass = "bg-purple-600/20 text-purple-300";
-                statusText = allowed ? "ALLOW (CUSTOM)" : "DENY (CUSTOM)";
-              } else {
-                badgeClass = allowed
-                  ? "bg-green-500/20 text-green-300"
-                  : "bg-red-500/20 text-red-300";
-                statusText = allowed ? "ALLOW" : "DENY";
-              }
-
-              return `<div class="flex justify-between items-center">
-            <span class="text-langley-white">${tool}</span>
-            <span class="px-2 py-1 rounded text-xs ${badgeClass}">
-              ${statusText}
-            </span>
-          </div>`;
-            })
-            .join("");
-
-          permissionsDiv.classList.remove("hidden");
 
           // Render test action buttons
           this.renderTestActions(identityId, permissions);
@@ -1971,36 +1985,37 @@
 
           try {
             // Make actual API call to server
-            const response = await fetch('/mcp', {
-              method: 'POST',
+            const response = await fetch("/mcp", {
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${identityId}`
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${identityId}`,
               },
               body: JSON.stringify({
-                method: action
-              })
+                method: action,
+              }),
             });
 
             const result = await response.json();
             const allowed = response.ok;
-            const reason = result.reason || (allowed ? 'Action successful' : result.error);
-            
+            const reason =
+              result.reason || (allowed ? "Action successful" : result.error);
+
             // Log the actual server response
             this.logAction(identityId, action, allowed, reason, true);
-            
+
             // Show result in console for debugging
-            console.log('Test Action Result:', {
+            console.log("Test Action Result:", {
               identity: identity.name,
               action: action,
               allowed: allowed,
-              response: result
+              response: result,
             });
-            
+
             return allowed;
           } catch (error) {
-            console.error('Error testing action:', error);
-            this.logAction(identityId, action, false, 'Network error', true);
+            console.error("Error testing action:", error);
+            this.logAction(identityId, action, false, "Network error", true);
             return false;
           }
         }
